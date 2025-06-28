@@ -1,0 +1,23 @@
+[
+  {
+    "id": 100,
+    "userId": 1,
+    "body": "Excited to launch Postive – a tiny micro-blog built in six weeks!",
+    "tag": "general",
+    "imageName": null
+  },
+  {
+    "id": 101,
+    "userId": 2,
+    "body": "Coffee ☕ + code = perfect combo.",
+    "tag": "life",
+    "imageName": null
+  },
+  {
+    "id": 102,
+    "userId": 3,
+    "body": "Fun fact: a day on Venus is longer than its year.",
+    "tag": "fun",
+    "imageName": null
+  }
+]

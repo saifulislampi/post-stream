@@ -1,0 +1,5 @@
+[
+  { "id": 1, "postId": 100, "userId": 2, "body": "Congrats on the launch! 🎉" },
+  { "id": 2, "postId": 100, "userId": 3, "body": "Can't wait to try it out." },
+  { "id": 3, "postId": 101, "userId": 1, "body": "Agreed – fuel of champions." }
+]

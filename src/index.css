@@ -1,13 +1,170 @@
-body {
+/* ───────────────────────────────────────── GLOBAL RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* ───────────────────────────────────────── THEME TOKENS  */
+:root {
+  --bg: #f0f2f5;
+  --card: #ffffff;
+  --text: #0f1419;
+  --subtext: #536471;
+  --accent: #1d9bf0; /* twitter blue */
+  --accent-hover: #1a8cd8;
+  --border: #e6ecf0;
+  --radius: 8px;
+  --shadow: 0 2px 4px rgba(15, 17, 25, 0.05);
+  --max: 768px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ───────────────────────────────────────── LAYOUT STRIPS */
+header,
+footer {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 0.4rem 0;
+  box-shadow: var(--shadow);
+}
+
+.header-content {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+header h1 {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--subtext);
+  margin-top: 1rem;
+}
+
+.container {
+  max-width: var(--max);
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+/* ───────────────────────────────────────── SEARCH COMPONENT */
+.search-container {
+  flex-grow: 1;
+  max-width: 300px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--card);
+  color: var(--text);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.search-input::placeholder {
+  color: var(--subtext);
+}
+
+/* ───────────────────────────────────────── TYPOGRAPHY     */
+h2 {
+  margin-bottom: 0.4rem;
+}
+ul {
+  list-style: none;
+  margin-top: 0.6rem;
+}
+
+/* ───────────────────────────────────────── CARDS & LIST   */
+li,
+article,
+form {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow);
+}
+.post-card p {
+  margin: 0.2rem 0 0.6rem;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.actions {
+  display: flex;
+  gap: 1.6rem;
+  color: var(--subtext);
+  font-size: 0.9rem;
+}
+.actions button {
+  background: none;
+  color: var(--accent);
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+.actions button:hover {
+  background: none;
+  color: var(--accent-hover);
+}
+
+/* ───────────────────────────────────────── COMPOSER */
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+textarea {
+  resize: vertical;
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+  background: var(--card);
+}
+input[type="file"],
+select {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+  background: var(--card);
+}
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font: inherit;
+}
+button:hover {
+  background: var(--accent-hover);
 }
