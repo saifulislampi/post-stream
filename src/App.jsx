@@ -12,6 +12,7 @@ import { fetchPostsWithAuthor, createPost } from "./services/posts";
 
 export default function App() {
   const [posts, setPosts] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const nav = useNavigate();
 
   /* initial load */
@@ -27,8 +28,24 @@ export default function App() {
     setPosts([saved, ...(posts ?? [])]);
   };
 
-  const handleSearch = term =>
-    console.log("Search not implemented yet. Key:", term);
+  const handleSearch = term => {
+    setSearchTerm(term);
+  };
+
+  // Filter posts based on search term
+  const filteredPosts = posts ? posts.filter(post => {
+    if (!searchTerm.trim()) return true;
+    
+    const searchLower = searchTerm.toLowerCase().trim();
+    return (
+      post.body.toLowerCase().includes(searchLower) ||
+      post.tag.toLowerCase().includes(searchLower) ||
+      (post.user && 
+        (`${post.user.firstName} ${post.user.lastName}`.toLowerCase().includes(searchLower) ||
+         post.user.firstName.toLowerCase().includes(searchLower) ||
+         post.user.lastName.toLowerCase().includes(searchLower)))
+    );
+  }) : null;
 
   if (!posts) return <Spinner />;
 
@@ -40,7 +57,14 @@ export default function App() {
         <Routes>
           <Route
             path="/"
-            element={<Timeline posts={posts} onAdd={handleAdd} />}
+            element={
+              <Timeline 
+                posts={filteredPosts} 
+                onAdd={handleAdd} 
+                searchTerm={searchTerm.trim()}
+                totalPosts={posts?.length}
+              />
+            }
           />
           <Route path="/post/:id" element={<PostPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

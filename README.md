@@ -1,4 +1,8 @@
-# Getting Started with Create React App
+# Post Stream
+
+A micro-blogging application built with React and Back4App.
+
+## Getting Started
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
@@ -9,6 +13,10 @@ In the project directory, you can run:
 ### `npm install`
 
 Installs the required dependencies.
+
+### `npm run seed`
+
+Seeds the Back4App database with initial test data (users, posts, and comments). Run this once after setting up your Back4App account.
 
 ### `npm start`
 
@@ -72,3 +80,26 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Back4App Setup
+
+This application uses Back4App as the backend service. To set up:
+
+1. Create a free account at [Back4App](https://www.back4app.com/)
+2. Create a new app in your Back4App dashboard
+3. Go to App Settings > Security & Keys
+4. Update the credentials in `src/environments.js` with your app's:
+   - Application ID
+   - Client Key (JavaScript Key)
+   - Server URL (usually `https://parseapi.back4app.com/`)
+
+### Database Structure
+
+The application uses the following Parse classes:
+- **AppUser**: `firstName`, `lastName`, `email`
+- **Post**: `userId`, `body`, `tag`, `imageName`
+- **Comment**: `postId`, `userId`, `body`
+
+### Initial Data
+
+Run `npm run seed` to populate your Back4App database with test data.
