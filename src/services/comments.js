@@ -1,19 +1,65 @@
 /**
- * Comments service - simple, with embedded data
+ * Comments service - using Back4App with Parse SDK
  */
 
-const COMMENTS = [
-  { id: 1, postId: 100, userId: 2, body: "Congrats on the launch! 🎉" },
-  { id: 2, postId: 100, userId: 3, body: "Can't wait to try it out." },
-  { id: 3, postId: 101, userId: 1, body: "Agreed – fuel of champions." },
-  { id: 4, postId: 101, userId: 3, body: "Coffee is life! ☕" },
-  { id: 5, postId: 102, userId: 2, body: "Space facts are always fascinating!" }
-];
+import Parse from 'parse';
+import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from '../environments.js';
+
+// Initialize Parse (if not already initialized)
+if (!Parse.applicationId) {
+  Parse.initialize(APPLICATION_ID, JAVASCRIPT_KEY);
+  Parse.serverURL = SERVER_URL;
+}
+
+// Helper function to convert Parse Comment object to plain object
+const parseCommentToPlain = (parseComment) => {
+  return {
+    id: parseComment.id,
+    postId: parseComment.get('postId'),
+    userId: parseComment.get('userId'),
+    body: parseComment.get('body'),
+    createdAt: parseComment.get('createdAt'),
+    updatedAt: parseComment.get('updatedAt')
+  };
+};
 
 /**
  * Fetches comments for a specific post
  * @param {string|number} postId - The ID of the post
  * @returns {Promise<Array>} Array of comments for the post
  */
-export const fetchCommentsByPost = async (postId) =>
-  COMMENTS.filter((c) => c.postId === Number(postId));
+export const fetchCommentsByPost = async (postId) => {
+  try {
+    const CommentQuery = new Parse.Query('Comment');
+    CommentQuery.equalTo('postId', postId.toString());
+    CommentQuery.ascending('createdAt'); // Order by oldest first for comments
+    const comments = await CommentQuery.find();
+    return comments.map(parseCommentToPlain);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+    // Return empty array instead of throwing to prevent UI from breaking
+    return [];
+  }
+};
+
+/**
+ * Creates a new comment
+ * @param {Object} commentData - The comment data
+ * @returns {Promise<Object>} The created comment
+ */
+export const createComment = async (commentData) => {
+  try {
+    const Comment = Parse.Object.extend('Comment');
+    const comment = new Comment();
+    
+    comment.set('postId', commentData.postId);
+    comment.set('userId', commentData.userId);
+    comment.set('body', commentData.body);
+    
+    const savedComment = await comment.save();
+    return parseCommentToPlain(savedComment);
+  } catch (error) {
+    console.error('Error creating comment:', error);
+    throw error;
+  }
+};
