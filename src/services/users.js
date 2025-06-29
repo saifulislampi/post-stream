@@ -21,6 +21,32 @@ const parseUserToPlain = (parseUser) => {
   };
 };
 
+
+/**
+ * Fetches the first user in the database
+ * @returns {Promise<Object|null>} First user or null if none found
+ */
+export const fetchFirstUser = async () => {
+  try {
+    const UserQuery = new Parse.Query('AppUser');
+    UserQuery.ascending('createdAt');
+    UserQuery.limit(1);
+    const user = await UserQuery.first();
+    
+    return user ? parseUserToPlain(user) : null;
+  } catch (error) {
+    console.error('Error fetching first user:', error);
+    // Return fallback user for development
+    return {
+      id: 'fallback-user',
+      firstName: 'Demo',
+      lastName: 'User',
+      email: 'demo@example.com'
+    };
+  }
+};
+
+
 export const fetchUsers = async () => {
   try {
     const UserQuery = new Parse.Query('AppUser');

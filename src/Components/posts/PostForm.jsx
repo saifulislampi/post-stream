@@ -8,20 +8,21 @@ import React, { useState } from "react";
 ===========================================================================*/
 export default function PostForm({ onAdd }) {
   const [body, setBody] = useState("");
-  const [tag,  setTag]  = useState("general");
-  const [img,  setImg]  = useState(null);
+  const [tag, setTag] = useState("general");
+  const [img, setImg] = useState(null);
 
   function submit(e) {
     e.preventDefault();
     if (!body.trim()) return;
     onAdd({
-      id:       Date.now(),
+      id: Date.now(),
       body,
       tag,
       imageName: img?.name || null,
-      userId:    1           // TODO: pull from auth context
     });
-    setBody(""); setTag("general"); setImg(null);
+    setBody("");
+    setTag("general");
+    setImg(null);
   }
 
   return (
@@ -31,10 +32,10 @@ export default function PostForm({ onAdd }) {
         maxLength={240}
         placeholder="What’s happening?"
         value={body}
-        onChange={e => setBody(e.target.value)}
+        onChange={(e) => setBody(e.target.value)}
       />
 
-      <select value={tag} onChange={e => setTag(e.target.value)}>
+      <select value={tag} onChange={(e) => setTag(e.target.value)}>
         <option value="general">General</option>
         <option value="tech">Tech</option>
         <option value="life">Life</option>
@@ -44,7 +45,7 @@ export default function PostForm({ onAdd }) {
       <input
         type="file"
         accept="image/*"
-        onChange={e => setImg(e.target.files[0])}
+        onChange={(e) => setImg(e.target.files[0])}
       />
 
       <button type="submit">Post</button>

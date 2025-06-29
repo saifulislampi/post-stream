@@ -9,21 +9,25 @@ import Timeline from "./pages/Timeline";
 import PostPage from "./pages/PostPage";
 
 import { fetchPostsWithAuthor, createPost } from "./services/posts";
+import { fetchFirstUser } from "./services/users";
 
 export default function App() {
   const [posts, setPosts] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentUser, setCurrentUser] = useState(null); // For future auth context
   const nav = useNavigate();
 
   /* initial load */
   useEffect(() => {
     fetchPostsWithAuthor().then(setPosts);
+    fetchFirstUser().then(setCurrentUser);
   }, []);
 
   const handleAdd = async raw => {
     const saved = await createPost({
       ...raw,
-      user: { id: 1, firstName: "Jane", lastName: "Doe" } // TODO: auth ctx
+      userId: currentUser?.id || "user1", // Use current user or default for testing
+      user: currentUser // Include user data for display
     });
     setPosts([saved, ...(posts ?? [])]);
   };
