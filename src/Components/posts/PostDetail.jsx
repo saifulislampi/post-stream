@@ -16,6 +16,8 @@ export default function PostDetail() {
 
   /* fetch post + comments whenever :id changes */
   useEffect(() => {
+    document.title = "Post Details - Post Stream";
+
     setLoading(true);
     setError(null);
     

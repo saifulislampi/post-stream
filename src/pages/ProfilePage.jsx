@@ -43,6 +43,8 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
+    document.title = "Profile Page - Post Stream";
+    
     setLoading(true);
     Promise.all([
       fetchUserById(userId),
