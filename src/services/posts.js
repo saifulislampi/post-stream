@@ -39,6 +39,7 @@ export const fetchPostsWithAuthor = async () => {
       id: user.id,
       firstName: user.get('firstName'),
       lastName: user.get('lastName'),
+      username: user.get('username'),
       email: user.get('email')
     }));
     

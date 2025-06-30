@@ -51,7 +51,7 @@ export default function PostDetail() {
 
   return (
     <article>
-      <button onClick={() => navigate(-1)}>← Back</button>
+      {/* <button onClick={() => navigate(-1)}>← Back</button> */}
 
       <h2>
         {post.user?.firstName} {post.user?.lastName}
