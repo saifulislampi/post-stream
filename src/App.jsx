@@ -20,8 +20,16 @@ export default function App() {
 
   /* initial load */
   useEffect(() => {
+    localStorage.removeItem("currentUserId");
+
     fetchPostsWithAuthor().then(setPosts);
-    fetchFirstUser().then(setCurrentUser);
+
+    fetchFirstUser().then(user => {
+      if (user) {
+        localStorage.setItem("currentUserId", user.id);
+        setCurrentUser(user);
+      }
+    });
   }, []);
 
   const handleAdd = async (raw) => {

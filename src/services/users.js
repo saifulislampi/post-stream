@@ -17,7 +17,10 @@ const parseUserToPlain = (parseUser) => {
     id: parseUser.id,
     firstName: parseUser.get('firstName'),
     lastName: parseUser.get('lastName'),
-    email: parseUser.get('email')
+    email: parseUser.get('email'),
+    username: parseUser.get('username'),
+    followersCount: parseUser.get('followersCount') || 0,
+    followingCount: parseUser.get('followingCount') || 0
   };
 };
 

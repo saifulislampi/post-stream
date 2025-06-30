@@ -14,18 +14,40 @@ export default function PostItem({ post }) {
   return (
     <li className="post-card">
       <div>
-        <strong>
-          <Link 
-            to={`/user/${user.id}`} 
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            {fullName}
-          </Link>
-        </strong>
-        <span style={{ color: "#6b7280" }}> · #{post.tag || 'general'}</span>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            marginBottom: "4px",
+          }}
+        >
+          <strong>
+            <Link
+              to={`/user/${user.id}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              {fullName}
+            </Link>
+          </strong>
+          {user.username && (
+            <span style={{ color: "var(--text-muted, #6b7280)" }}>
+              <Link
+                to={`/user/${user.id}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                @{user.username}
+              </Link>
+            </span>
+          )}
+          <span style={{ color: "var(--text-muted, #6b7280)" }}>
+            {" "}
+            · #{post.tag || "general"}
+          </span>
+        </div>
         <p>
-          <Link 
-            to={`/post/${post.id}`} 
+          <Link
+            to={`/post/${post.id}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
             {post.body}

@@ -12,16 +12,6 @@ export default function Header({ onHome, onSearch, currentUser }) {
         
         {/* Navigation Links */}
         <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* <Link 
-            to="/" 
-            style={{ 
-              textDecoration: 'none', 
-              color: 'var(--accent)',
-              fontWeight: '500'
-            }}
-          >
-            Home
-          </Link> */}
           {currentUser && (
             <Link 
               to={`/user/${currentUser.id}`} 
@@ -48,7 +38,7 @@ export default function Header({ onHome, onSearch, currentUser }) {
               }}>
                 {currentUser.firstName?.[0]?.toUpperCase() || '?'}
               </div>
-              Profile
+              {currentUser.username ? `@${currentUser.username}` : 'Profile'}
             </Link>
           )}
         </nav>

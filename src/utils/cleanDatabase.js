@@ -41,6 +41,14 @@ async function cleanupDatabase() {
       await Parse.Object.destroyAll(comments);
       console.log(`Deleted ${comments.length} comments`);
     }
+
+    console.log('Cleaning up Follow relationships...');
+    const FollowQuery = new Parse.Query('Follow');
+    const follows = await FollowQuery.find();
+    if (follows.length > 0) {
+      await Parse.Object.destroyAll(follows);
+      console.log(`Deleted ${follows.length} follow relationships`);
+    }
     
     console.log('Database cleanup completed successfully!');
   } catch (error) {
