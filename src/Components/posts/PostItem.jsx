@@ -1,21 +1,36 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import PostActionBar from "./PostActionBar";
 
-export default function PostItem({ post, onClick }) {
-  // Handle case where user data might not be loaded yet
+export default function PostItem({ post }) {
   const user = post.user || {};
-  const fullName = user.firstName && user.lastName 
-    ? `${user.firstName} ${user.lastName}` 
-    : user.firstName || user.lastName 
-    ? (user.firstName || user.lastName)
-    : 'Loading...';
+  const fullName =
+    user.firstName && user.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user.firstName || user.lastName
+      ? user.firstName || user.lastName
+      : "Loading...";
 
   return (
     <li className="post-card">
-      <div onClick={onClick} style={{ cursor: "pointer" }}>
-        <strong>{fullName}</strong>
+      <div>
+        <strong>
+          <Link 
+            to={`/user/${user.id}`} 
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            {fullName}
+          </Link>
+        </strong>
         <span style={{ color: "#6b7280" }}> · #{post.tag || 'general'}</span>
-        <p>{post.body}</p>
+        <p>
+          <Link 
+            to={`/post/${post.id}`} 
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            {post.body}
+          </Link>
+        </p>
       </div>
       <PostActionBar />
     </li>
