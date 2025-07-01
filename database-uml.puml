@@ -21,6 +21,9 @@ class AppUser {
     +firstName : String
     +lastName : String
     +email : String
+    +username : String
+    +followersCount : Number
+    +followingCount : Number
 }
 
 class Post {
@@ -44,18 +47,32 @@ class Comment {
     +body : String
 }
 
+class Follow {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +followerId : String
+    +followingId : String
+}
+
 ' Relationships
 AppUser ||--o{ Post : "creates"
 AppUser ||--o{ Comment : "writes"
 Post ||--o{ Comment : "has"
+AppUser ||--o{ Follow : "follower"
+AppUser ||--o{ Follow : "following"
 
 ' Relationship labels
 Post }o--|| AppUser : author
 Comment }o--|| AppUser : author
 Comment }o--|| Post : belongs to
+Follow }o--|| AppUser : follower
+Follow }o--|| AppUser : following
 
-note right of AppUser : User profile information\nfor post authors
+note right of AppUser : User profile information\nwith follower/following counts
 note bottom of Post : Main content items\nwith tags and optional images
 note bottom of Comment : User responses\nto posts
+note left of Follow : User follow relationships\nfor social connections
 
 @enduml
