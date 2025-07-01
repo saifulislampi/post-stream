@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchPostsWithAuthor } from "../../services/PostService";
-import { fetchCommentsByPost } from "../../services/CommentService";
+import { fetchPostsWithAuthor } from "../../services/posts";
+import { fetchCommentsByPost } from "../../services/comments";
 import Spinner from "../shared/Spinner";
 
 function formatTimestamp(date) {

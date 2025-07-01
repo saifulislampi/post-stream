@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PostList from "../components/posts/PostList";
 import SearchInput from "../components/shared/SearchInput";
-import { fetchPostsWithAuthor } from "../services/PostService";
+import { fetchPostsWithAuthor } from "../services/posts";
 import Spinner from "../components/shared/Spinner";
 
 export default function ExplorePage() {

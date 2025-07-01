@@ -10,8 +10,8 @@ import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
 import ExplorePage from "./pages/ExplorePage";
 
-import { fetchPostsWithAuthor, createPost } from "./services/PostService";
-import { fetchFirstUser } from "./services/UserService";
+import { fetchPostsWithAuthor, createPost } from "./services/posts";
+import { fetchFirstUser } from "./services/users";
 
 export default function App() {
   // State for all posts loaded from backend
