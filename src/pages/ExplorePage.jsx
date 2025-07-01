@@ -5,6 +5,7 @@ import { fetchPostsWithAuthor } from "../services/PostService";
 import Spinner from "../components/shared/Spinner";
 
 export default function ExplorePage() {
+  // TODO: Add debounce to search input for better UX
   const [searchTerm, setSearchTerm] = useState("");
   const [posts, setPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import Logo from "./Logo";
 
 export default function Header({ currentUser }) {
+  // TODO: Add notification bell and user dropdown in future
   const location = useLocation();
 
   // Close mobile navbar when clicking on nav links

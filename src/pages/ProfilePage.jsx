@@ -8,6 +8,7 @@ import PostList from "../components/posts/PostList";
 
 import "../styles/ProfilePage.css"; // Assuming you have some styles for the profile page
 
+// TODO: Consider adding user bio and location fields in the future
 function getInitials(user) {
   if (!user) return "?";
   if (user.firstName && user.lastName)
@@ -29,6 +30,7 @@ export default function ProfilePage() {
   const [isHoveringFollow, setIsHoveringFollow] = useState(false);
 
   useEffect(() => {
+    // TODO: Add error handling for failed user fetch
     const storedUserId = localStorage.getItem("currentUserId");
     if (storedUserId) {
       setCurrentUserId(storedUserId);
@@ -47,6 +49,7 @@ export default function ProfilePage() {
   useEffect(() => {
     document.title = "Profile - Post Stream";
     setLoading(true);
+    // TODO: Optimize to avoid unnecessary fetches on every userId/currentUserId change
     Promise.all([fetchUserById(userId), fetchPostsWithAuthor()])
       .then(([userData, allPosts]) => {
         setUser(userData);
@@ -78,6 +81,7 @@ export default function ProfilePage() {
         }));
       }
     } catch (err) {
+      // TODO: Show user feedback on follow/unfollow error
       console.error("Follow action failed:", err);
     } finally {
       setFollowLoading(false);
