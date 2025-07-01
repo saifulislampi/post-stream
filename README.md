@@ -40,9 +40,10 @@ This project was developed as a class project for [CSE 40693 - Modern Web Develo
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Database Structure
-- **AppUser**: `firstName`, `lastName`, `email`
-- **Post**: `userId`, `body`, `imageName`
+- **AppUser**: `firstName`, `lastName`, `email`, `username`, `followersCount`, `followingCount`
+- **Post**: `userId`, `body`, `tag`, `imageName`
 - **Comment**: `postId`, `userId`, `body`
+- **Follow**: `followerId`, `followingId`
 
 ## Scripts
 - `npm install` – Install dependencies
