@@ -135,15 +135,17 @@ export default function ProfilePage() {
               <button
                 onMouseEnter={() => setIsHoveringFollow(true)}
                 onMouseLeave={() => setIsHoveringFollow(false)}
-                className={`profile-follow-btn ${
-                  isFollowingUser ? "following" : ""
-                }`}
+                onClick={handleFollowToggle}
+                disabled={followLoading}
+                className={`profile-follow-btn ${isFollowingUser ? "following" : ""}`}
               >
-                {isFollowingUser
-                  ? isHoveringFollow
-                    ? "Unfollow"
-                    : "Following"
-                  : "Follow"}
+                {followLoading
+                  ? (isFollowingUser ? "Unfollowing..." : "Following...")
+                  : isFollowingUser
+                    ? isHoveringFollow
+                      ? "Unfollow"
+                      : "Following"
+                    : "Follow"}
               </button>
             )}
           </div>
