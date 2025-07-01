@@ -2,7 +2,6 @@ import React, { useState } from "react";
 
 export default function PostForm({ onAdd, currentUser }) {
   const [body, setBody] = useState("");
-  const [tag, setTag] = useState("general");
   const [img, setImg] = useState(null);
 
   function submit(e) {
@@ -11,61 +10,78 @@ export default function PostForm({ onAdd, currentUser }) {
     onAdd({
       id: Date.now(),
       body,
-      tag,
+      tag: "general", // Default tag, we'll add hashtag parsing later
       imageName: img?.name || null,
     });
     setBody("");
-    setTag("general");
     setImg(null);
   }
 
   const userInitial = currentUser ? currentUser.firstName[0].toUpperCase() : "?";
+  const charLimit = 280;
+  const remainingChars = charLimit - body.length;
 
   return (
-    <form onSubmit={submit} className="mb-4 p-3 post-card">
-      <div className="d-flex">
-        <div className="me-3">
-          <div className="rounded-circle d-flex align-items-center justify-content-center" style={{ width: "48px", height: "48px", background: "#007bff", color: "#fff", fontSize: "1.4rem" }}>
-            {userInitial}
+    <div className="post-form-container">
+      <form onSubmit={submit} className="post-form">
+        <div className="post-form-header">
+          <div className="user-avatar">{userInitial}</div>
+          <div className="form-content">
+            <textarea
+              className="post-textarea"
+              placeholder="What's happening?"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              maxLength={charLimit}
+              rows={3}
+            />
           </div>
         </div>
-        <div className="flex-grow-1">
-          <textarea
-            className="form-control mb-3"
-            rows={3}
-            maxLength={240}
-            placeholder="What's on your mind?"
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            style={{ resize: "none", background: "var(--card)", color: "var(--text)" }}
-          />
-          <div className="d-flex justify-content-between align-items-center">
-            <div className="d-flex align-items-center">
-              <select
-                value={tag}
-                onChange={(e) => setTag(e.target.value)}
-                className="form-select form-select-sm me-3"
-                style={{ width: "auto" }}
-              >
-                <option value="general">General</option>
-                <option value="tech">Tech</option>
-                <option value="life">Life</option>
-                <option value="fun">Fun</option>
-              </select>
+
+        <div className="post-form-footer">
+          <div className="post-actions">
+            <label className="action-btn media-btn" title="Add photo">
+              <i className="bi bi-image"></i>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setImg(e.target.files[0])}
-                className="form-control form-control-sm"
-                style={{ width: "auto" }}
+                className="file-input"
               />
+            </label>
+            <button
+              type="button"
+              className="action-btn emoji-btn"
+              title="Add emoji"
+            >
+              <i className="bi bi-emoji-smile"></i>
+            </button>
+          </div>
+
+          <div className="post-submit">
+            <div className="char-counter">
+              <span
+                className={
+                  remainingChars < 20
+                    ? "text-warning"
+                    : remainingChars < 0
+                    ? "text-danger"
+                    : "text-muted"
+                }
+              >
+                {remainingChars}
+              </span>
             </div>
-            <button type="submit" className="btn btn-primary" disabled={!body.trim()}>
+            <button
+              type="submit"
+              className="post-btn"
+              disabled={!body.trim() || remainingChars < 0}
+            >
               Post
             </button>
           </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }

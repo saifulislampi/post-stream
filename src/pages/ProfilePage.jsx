@@ -86,7 +86,7 @@ export default function ProfilePage() {
   const isOwnProfile = currentUserId === userId;
 
   return (
-    <div className="container" style={{ maxWidth: 600, margin: "0 auto", padding: "20px" }}>
+    <div className="container-main" style={{ marginTop: "20px" }}>
       <div className="d-flex align-items-center gap-3 mb-4 p-3 bg-white rounded border">
         <div
           className="profile-avatar"
@@ -95,12 +95,11 @@ export default function ProfilePage() {
             height: 80,
             borderRadius: "50%",
             background: "var(--accent)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
             fontSize: "36px",
             fontWeight: "700",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center"
           }}
         >
           {user.imageUrl ? (
@@ -132,9 +131,7 @@ export default function ProfilePage() {
             onClick={handleFollowToggle}
             disabled={followLoading}
             className="btn btn-outline-primary"
-            style={{
-              borderRadius: "20px",
-            }}
+            style={{ borderRadius: "20px" }}
           >
             {followLoading ? "..." : isFollowingUser ? "Unfollow" : "Follow"}
           </button>

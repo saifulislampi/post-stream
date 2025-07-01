@@ -25,24 +25,39 @@ export default function PostItem({ post }) {
     <div className="card post-card mb-3">
       <div className="card-body">
         <div className="d-flex align-items-center mb-2">
-          <strong>
-            <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
-              {fullName}
-            </Link>
-          </strong>
-          {user.username && (
-            <span className="text-muted ms-2">
+          {/* Avatar on the left */}
+          <div
+            className="rounded-circle me-2 profile-avatar"
+            style={{
+              width: 40,
+              height: 40,
+              background: "var(--primary)",
+              fontSize: "1rem",
+              fontWeight: "600"
+            }}
+          >
+            {user.firstName ? user.firstName[0].toUpperCase() : "?"}
+          </div>
+          <div>
+            <strong>
               <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
-                @{user.username}
+                {fullName}
+              </Link>
+            </strong>
+            {user.username && (
+              <span className="text-muted ms-2">
+                <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
+                  @{user.username}
+                </Link>
+              </span>
+            )}
+            <span className="text-muted ms-2"> · #{post.tag || "general"}</span>
+            <span className="text-muted ms-2">
+              <Link to={`/post/${post.id}`} className="text-decoration-none text-reset">
+                {formattedTimestamp}
               </Link>
             </span>
-          )}
-          <span className="text-muted ms-2"> · #{post.tag || "general"}</span>
-          <span className="text-muted ms-2">
-            <Link to={`/post/${post.id}`} className="text-decoration-none text-reset">
-              {formattedTimestamp}
-            </Link>
-          </span>
+          </div>
         </div>
         <p className="card-text">{post.body}</p>
         <PostActionBar />
