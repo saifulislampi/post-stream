@@ -11,8 +11,8 @@ import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
 import ExplorePage from "./pages/ExplorePage";
 
-import { fetchPostsWithAuthor, createPost } from "./services/posts";
-import { fetchFirstUser } from "./services/users";
+import { fetchPostsWithAuthor, createPost } from "./services/PostService";
+import { fetchFirstUser } from "./services/UserService";
 
 export default function App() {
   const [posts, setPosts] = useState(null);

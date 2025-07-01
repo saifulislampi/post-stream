@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchPostsWithAuthor } from "../services/posts";
-import { fetchUserById } from "../services/users";
-import { isFollowing, followUser, unfollowUser } from "../services/follows";
+import { fetchPostsWithAuthor } from "../services/PostService";
+import { fetchUserById } from "../services/UserService";
+import { isFollowing, followUser, unfollowUser } from "../services/FollowService";
 import Spinner from "../components/shared/Spinner";
 import PostItem from "../components/posts/PostItem";
 
@@ -33,7 +33,7 @@ export default function ProfilePage() {
     if (storedUserId) {
       setCurrentUserId(storedUserId);
     } else {
-      import("../services/users").then(({ fetchFirstUser }) => {
+      import("../services/UserService").then(({ fetchFirstUser }) => {
         fetchFirstUser().then((user) => {
           if (user) {
             localStorage.setItem("currentUserId", user.id);
