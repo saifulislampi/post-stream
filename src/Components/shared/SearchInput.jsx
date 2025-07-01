@@ -30,7 +30,7 @@ export default function SearchInput({ onSearch, placeholder = "Search posts..." 
   };
 
   return (
-    <div className="position-relative" style={{ flex: 1, maxWidth: "400px" }}>
+    <div className="position-relative w-100">
       <input
         ref={inputRef}
         type="text"

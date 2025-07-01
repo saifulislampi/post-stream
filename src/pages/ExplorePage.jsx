@@ -61,7 +61,7 @@ export default function ExplorePage() {
 
   return (
     <div className="explore-page">
-      <div className="explore-header mb-4">
+      <div className="explore-header mb-4" style={{ padding: "1rem" }}>
         <h1 className="h3 fw-bold mb-3">Explore</h1>
         <SearchInput
           onSearch={handleSearch}
