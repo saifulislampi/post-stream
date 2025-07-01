@@ -6,12 +6,9 @@ This project was developed as a class project for [CSE 40693 - Modern Web Develo
 
 > **Note:** This repository follows instructions and requirements from the course instructor. Naming conventions and some code styles are therefore opinionated and may differ from typical production code.
 
-## Features
-
-- Create and view posts (with optional images)
-- Follow/unfollow users
-- Explore trending topics and suggested users
-- Responsive design for mobile, tablet, and desktop
+## Team Members
+- **Student A**: Showkot Hossain (shossain@nd.edu)
+- **Student B**: Md Saiful Islam (mislam5@nd.edu)
 
 ## Getting Started
 
@@ -32,11 +29,6 @@ This project was developed as a class project for [CSE 40693 - Modern Web Develo
    npm start
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Database Structure
-- **AppUser**: `firstName`, `lastName`, `email`
-- **Post**: `userId`, `body`, `imageName`
-- **Comment**: `postId`, `userId`, `body`
 
 ## Scripts
 - `npm install` – Install dependencies
