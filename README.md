@@ -4,8 +4,6 @@ Post Stream is a modern micro-blogging app inspired by Twitter, built with React
 
 This project was developed as a class project for [CSE 40693 - Modern Web Development](https://www.coursicle.com/nd/courses/CSE/40693/) at Notre Dame.
 
-> **Note:** This repository follows instructions and requirements from the course instructor. Naming conventions and some code styles are therefore opinionated and may differ from typical production code.
-
 ## Features
 
 ### Backend Implemented
