@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./components/layout/Header";
 import RightSidebar from "./components/layout/RightSidebar";
-import Footer from "./components/layout/Footer";
 import Spinner from "./components/shared/Spinner";
 
 import Timeline from "./pages/Timeline";
@@ -16,7 +15,6 @@ import { fetchFirstUser } from "./services/UserService";
 
 export default function App() {
   const [posts, setPosts] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -39,23 +37,6 @@ export default function App() {
     setPosts([saved, ...(posts ?? [])]);
   };
 
-  const handleSearch = (term) => setSearchTerm(term);
-
-  const filteredPosts = posts
-    ? posts.filter((post) => {
-        if (!searchTerm.trim()) return true;
-        const searchLower = searchTerm.toLowerCase().trim();
-        return (
-          post.body.toLowerCase().includes(searchLower) ||
-          post.tag.toLowerCase().includes(searchLower) ||
-          (post.user &&
-            `${post.user.firstName} ${post.user.lastName}`
-              .toLowerCase()
-              .includes(searchLower))
-        );
-      })
-    : null;
-
   if (!posts) return <Spinner />;
 
   return (
@@ -71,7 +52,7 @@ export default function App() {
                 path="/"
                 element={
                   <Timeline
-                    posts={filteredPosts}
+                    posts={posts}
                     onAdd={handleAdd}
                     currentUser={currentUser}
                   />
