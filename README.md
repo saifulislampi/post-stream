@@ -1,105 +1,49 @@
 # Post Stream
 
-A micro-blogging application built with React and Back4App.
+Post Stream is a modern micro-blogging app inspired by Twitter, built with React and Back4App. Share short posts, follow users, and explore trending content in a clean, responsive interface.
+
+This project was developed as a class project for [CSE 40693 - Modern Web Development](https://www.coursicle.com/nd/courses/CSE/40693/) at Notre Dame.
+
+> **Note:** This repository follows instructions and requirements from the course instructor. Naming conventions and some code styles are therefore opinionated and may differ from typical production code.
+
+## Features
+
+- Create and view posts (with optional images)
+- Follow/unfollow users
+- Explore trending topics and suggested users
+- Responsive design for mobile, tablet, and desktop
 
 ## Getting Started
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+1. **Install dependencies:**
+   ```
+   npm install
+   ```
+2. **Set up Back4App:**
+   - Create a free account at [Back4App](https://www.back4app.com/)
+   - Create a new app and get your Application ID, Client Key, and Server URL
+   - Update `src/environments.js` with your credentials
+3. **Seed the database with test data:**
+   ```
+   npm run seed
+   ```
+4. **Start the development server:**
+   ```
+   npm start
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm install`
-
-Installs the required dependencies.
-
-### `npm run seed`
-
-Seeds the Back4App database with initial test data (users, posts, and comments). Run this once after setting up your Back4App account.
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-
-## Back4App Setup
-
-This application uses Back4App as the backend service. To set up:
-
-1. Create a free account at [Back4App](https://www.back4app.com/)
-2. Create a new app in your Back4App dashboard
-3. Go to App Settings > Security & Keys
-4. Update the credentials in `src/environments.js` with your app's:
-   - Application ID
-   - Client Key (JavaScript Key)
-   - Server URL (usually `https://parseapi.back4app.com/`)
-
-### Database Structure
-
-The application uses the following Parse classes:
+## Database Structure
 - **AppUser**: `firstName`, `lastName`, `email`
-- **Post**: `userId`, `body`, `tag`, `imageName`
+- **Post**: `userId`, `body`, `imageName`
 - **Comment**: `postId`, `userId`, `body`
 
-### Initial Data
+## Scripts
+- `npm install` – Install dependencies
+- `npm run seed` – Seed Back4App with test data
+- `npm start` – Start the development server
+- `npm run build` – Build for production
 
-Run `npm run seed` to populate your Back4App database with test data.
+---
+
+For any issues or contributions, please open an issue or pull request.
