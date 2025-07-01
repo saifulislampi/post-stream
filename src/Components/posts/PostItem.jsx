@@ -13,55 +13,50 @@ function formatTimestamp(date) {
 
 export default function PostItem({ post }) {
   const user = post.user || {};
-  const fullName =
-    user.firstName && user.lastName
-      ? `${user.firstName} ${user.lastName}`
-      : user.firstName || user.lastName
-      ? user.firstName || user.lastName
-      : "Loading...";
+  const fullName = user.firstName && user.lastName 
+    ? `${user.firstName} ${user.lastName}` 
+    : user.firstName || user.lastName || "Unknown User";
   const formattedTimestamp = formatTimestamp(post.createdAt);
 
   return (
-    <div className="card post-card mb-3">
-      <div className="card-body">
-        <div className="d-flex align-items-center mb-2">
-          {/* Avatar on the left */}
-          <div
-            className="rounded-circle me-2 profile-avatar"
-            style={{
-              width: 40,
-              height: 40,
-              background: "var(--primary)",
-              fontSize: "1rem",
-              fontWeight: "600"
-            }}
-          >
-            {user.firstName ? user.firstName[0].toUpperCase() : "?"}
-          </div>
-          <div>
-            <strong>
-              <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
-                {fullName}
+    <article className="post-item">
+      <div className="post-content">
+        <div className="d-flex gap-3">
+          {/* Avatar */}
+          <Link to={`/user/${user.id}`} className="text-decoration-none">
+            <div className="profile-avatar" style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}>
+              {user.firstName?.[0]?.toUpperCase() || "?"}
+            </div>
+          </Link>
+          
+          {/* Post Content */}
+          <div className="flex-grow-1 min-width-0">
+            {/* User Info */}
+            <div className="d-flex align-items-center gap-1 mb-1">
+              <Link to={`/user/${user.id}`} className="text-decoration-none">
+                <span className="fw-bold text-dark">{fullName}</span>
               </Link>
-            </strong>
-            {user.username && (
-              <span className="text-muted ms-2">
-                <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
-                  @{user.username}
-                </Link>
-              </span>
-            )}
-            <span className="text-muted ms-2"> · #{post.tag || "general"}</span>
-            <span className="text-muted ms-2">
-              <Link to={`/post/${post.id}`} className="text-decoration-none text-reset">
-                {formattedTimestamp}
+              {user.username && (
+                <span className="text-muted">@{user.username}</span>
+              )}
+              <span className="text-muted">·</span>
+              <Link to={`/post/${post.id}`} className="text-decoration-none">
+                <span className="text-muted">{formattedTimestamp}</span>
               </Link>
-            </span>
+            </div>
+            
+            {/* Post Body */}
+            <div className="post-body mb-2">
+              <Link to={`/post/${post.id}`} className="text-decoration-none text-dark">
+                {post.body}
+              </Link>
+            </div>
+            
+            {/* Post Actions */}
+            <PostActionBar />
           </div>
         </div>
-        <p className="card-text">{post.body}</p>
-        <PostActionBar />
       </div>
-    </div>
+    </article>
   );
 }

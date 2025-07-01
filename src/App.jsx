@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./components/layout/Header";
+import RightSidebar from "./components/layout/RightSidebar";
 import Footer from "./components/layout/Footer";
 import Spinner from "./components/shared/Spinner";
 
@@ -21,7 +22,7 @@ export default function App() {
   useEffect(() => {
     localStorage.removeItem("currentUserId");
     fetchPostsWithAuthor().then(setPosts);
-    fetchFirstUser().then(user => {
+    fetchFirstUser().then((user) => {
       if (user) {
         localStorage.setItem("currentUserId", user.id);
         setCurrentUser(user);
@@ -48,7 +49,9 @@ export default function App() {
           post.body.toLowerCase().includes(searchLower) ||
           post.tag.toLowerCase().includes(searchLower) ||
           (post.user &&
-            (`${post.user.firstName} ${post.user.lastName}`.toLowerCase().includes(searchLower)))
+            `${post.user.firstName} ${post.user.lastName}`
+              .toLowerCase()
+              .includes(searchLower))
         );
       })
     : null;
@@ -56,67 +59,35 @@ export default function App() {
   if (!posts) return <Spinner />;
 
   return (
-    <div className="app-container">
+    <div className="app">
       <Header currentUser={currentUser} />
-      
-      <div className="main-content">
-        <div className="content-wrapper">
-          <Routes>
-            <Route
-              path="/"
-              element={<Timeline posts={filteredPosts} onAdd={handleAdd} currentUser={currentUser} />}
-            />
-            <Route path="/post/:id" element={<PostPage />} />
-            <Route path="/user/:userId" element={<ProfilePage />} />
-            <Route path="/explore" element={<ExplorePage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+
+      <div className="container-fluid p-0">
+        <div className="row g-0 justify-content-center">
+          {/* Main Content */}
+          <main className="col-12 col-lg-6 col-xl-5 main-content">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Timeline
+                    posts={filteredPosts}
+                    onAdd={handleAdd}
+                    currentUser={currentUser}
+                  />
+                }
+              />
+              <Route path="/post/:id" element={<PostPage />} />
+              <Route path="/user/:userId" element={<ProfilePage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+
+          {/* Right Sidebar */}
+          <RightSidebar />
         </div>
-        
-        {/* Right sidebar for desktop - trends, suggestions, etc. */}
-        <aside className="right-sidebar d-none d-xl-block">
-          <div className="trends-widget">
-            <h5 className="widget-title">Trending</h5>
-            <div className="trend-item">
-              <div className="trend-category">Trending in Tech</div>
-              <div className="trend-title">#React</div>
-              <div className="trend-count">2,845 posts</div>
-            </div>
-            <div className="trend-item">
-              <div className="trend-category">Trending</div>
-              <div className="trend-title">#WebDev</div>
-              <div className="trend-count">1,234 posts</div>
-            </div>
-            <div className="trend-item">
-              <div className="trend-category">Trending in Life</div>
-              <div className="trend-title">#MondayMotivation</div>
-              <div className="trend-count">892 posts</div>
-            </div>
-          </div>
-          
-          <div className="suggestions-widget">
-            <h5 className="widget-title">Who to follow</h5>
-            <div className="suggestion-item">
-              <div className="suggestion-avatar">JS</div>
-              <div className="suggestion-info">
-                <div className="suggestion-name">John Smith</div>
-                <div className="suggestion-handle">@johnsmith</div>
-              </div>
-              <button className="btn btn-outline-primary btn-sm">Follow</button>
-            </div>
-            <div className="suggestion-item">
-              <div className="suggestion-avatar">AD</div>
-              <div className="suggestion-info">
-                <div className="suggestion-name">Alice Doe</div>
-                <div className="suggestion-handle">@alicedoe</div>
-              </div>
-              <button className="btn btn-outline-primary btn-sm">Follow</button>
-            </div>
-          </div>
-        </aside>
       </div>
-      
-      <Footer />
     </div>
   );
 }
