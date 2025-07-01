@@ -1,30 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Header from "./components/layout/Header";
+import RightSidebar from "./components/layout/RightSidebar";
 import Footer from "./components/layout/Footer";
 import Spinner from "./components/shared/Spinner";
 
 import Timeline from "./pages/Timeline";
 import PostPage from "./pages/PostPage";
 import ProfilePage from "./pages/ProfilePage";
+import ExplorePage from "./pages/ExplorePage";
 
-import { fetchPostsWithAuthor, createPost } from "./services/posts";
-import { fetchFirstUser } from "./services/users";
+import { fetchPostsWithAuthor, createPost } from "./services/PostService";
+import { fetchFirstUser } from "./services/UserService";
 
 export default function App() {
   const [posts, setPosts] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [currentUser, setCurrentUser] = useState(null); // For future auth context
-  const nav = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
 
-  /* initial load */
   useEffect(() => {
     localStorage.removeItem("currentUserId");
-
     fetchPostsWithAuthor().then(setPosts);
-
-    fetchFirstUser().then(user => {
+    fetchFirstUser().then((user) => {
       if (user) {
         localStorage.setItem("currentUserId", user.id);
         setCurrentUser(user);
@@ -35,31 +33,25 @@ export default function App() {
   const handleAdd = async (raw) => {
     const saved = await createPost({
       ...raw,
-      userId: currentUser?.id || "user1", // Use current user or default for testing
-      user: currentUser, // Include user data for display
+      userId: currentUser?.id || "user1",
+      user: currentUser,
     });
     setPosts([saved, ...(posts ?? [])]);
   };
 
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-  };
+  const handleSearch = (term) => setSearchTerm(term);
 
-  // Filter posts based on search term
   const filteredPosts = posts
     ? posts.filter((post) => {
         if (!searchTerm.trim()) return true;
-
         const searchLower = searchTerm.toLowerCase().trim();
         return (
           post.body.toLowerCase().includes(searchLower) ||
           post.tag.toLowerCase().includes(searchLower) ||
           (post.user &&
-            (`${post.user.firstName} ${post.user.lastName}`
+            `${post.user.firstName} ${post.user.lastName}`
               .toLowerCase()
-              .includes(searchLower) ||
-              post.user.firstName.toLowerCase().includes(searchLower) ||
-              post.user.lastName.toLowerCase().includes(searchLower)))
+              .includes(searchLower))
         );
       })
     : null;
@@ -67,29 +59,35 @@ export default function App() {
   if (!posts) return <Spinner />;
 
   return (
-    <>
-      <Header onHome={() => nav("/")} onSearch={handleSearch} currentUser={currentUser}/>
+    <div className="app">
+      <Header currentUser={currentUser} />
 
-      <main className="container">
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Timeline
-                posts={filteredPosts}
-                onAdd={handleAdd}
-                searchTerm={searchTerm.trim()}
-                totalPosts={posts?.length}
+      <div className="container-fluid p-0">
+        <div className="row g-0 justify-content-center">
+          {/* Main Content */}
+          <main className="col-12 col-lg-6 col-xl-5 main-content">
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Timeline
+                    posts={filteredPosts}
+                    onAdd={handleAdd}
+                    currentUser={currentUser}
+                  />
+                }
               />
-            }
-          />
-          <Route path="/post/:id" element={<PostPage />} />
-          <Route path="/user/:userId" element={<ProfilePage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
+              <Route path="/post/:id" element={<PostPage />} />
+              <Route path="/user/:userId" element={<ProfilePage />} />
+              <Route path="/explore" element={<ExplorePage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
 
-      <Footer />
-    </>
+          {/* Right Sidebar */}
+          <RightSidebar />
+        </div>
+      </div>
+    </div>
   );
 }

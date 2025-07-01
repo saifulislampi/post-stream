@@ -1,48 +1,138 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Logo from "./Logo";
-import SearchInput from "../shared/SearchInput";
 
-export default function Header({ onHome, onSearch, currentUser }) {
+export default function Header({ currentUser }) {
+  const location = useLocation();
+
+  // Close mobile navbar when clicking on nav links
+  const closeMobileNav = () => {
+    const navbarCollapse = document.getElementById('mobileNav');
+    if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+      const bsCollapse = new window.bootstrap.Collapse(navbarCollapse);
+      bsCollapse.hide();
+    }
+  };
+
   return (
-    <header className="header">
-      <div className="header-content">
-        <Logo width={120} height={48} onClick={onHome} />
-        <SearchInput onSearch={onSearch} />
-        
-        {/* Navigation Links */}
-        <nav style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {currentUser && (
+    <>
+      {/* Desktop Sidebar - Only on large screens */}
+      <aside className="sidebar d-none d-lg-block">
+        <div className="sidebar-content">
+          <div className="mb-4 mt-3">
+            <Logo width={160} height={64} />
+          </div>
+          <nav className="nav flex-column">
             <Link 
-              to={`/user/${currentUser.id}`} 
-              style={{ 
-                textDecoration: 'none', 
-                color: 'var(--accent)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                fontWeight: '500'
-              }}
+              to="/" 
+              className={`nav-link ${location.pathname === "/" ? "active" : ""}`}
             >
-              <div style={{
-                width: 24, 
-                height: 24, 
-                borderRadius: '50%',
-                background: 'var(--accent)', 
-                color: '#fff',
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                fontSize: 12, 
-                fontWeight: 700
-              }}>
-                {currentUser.firstName?.[0]?.toUpperCase() || '?'}
-              </div>
-              {currentUser.username ? `@${currentUser.username}` : 'Profile'}
+              <i className="bi bi-house-door-fill"></i>
+              <span>Home</span>
             </Link>
+            <Link 
+              to="/explore" 
+              className={`nav-link ${location.pathname === "/explore" ? "active" : ""}`}
+            >
+              <i className="bi bi-search"></i>
+              <span>Explore</span>
+            </Link>
+            {currentUser && (
+              <Link 
+                to={`/user/${currentUser.id}`} 
+                className={`nav-link ${location.pathname.startsWith("/user/") ? "active" : ""}`}
+              >
+                <i className="bi bi-person-fill"></i>
+                <span>Profile</span>
+              </Link>
+            )}
+          </nav>
+          {currentUser && (
+            <div className="mt-auto mb-3">
+              <div className="user-info-card">
+                <div className="profile-avatar me-3" style={{ width: 40, height: 40, fontSize: "1.2rem" }}>
+                  {currentUser.firstName?.[0]?.toUpperCase() || "?"}
+                </div>
+                <div className="flex-grow-1">
+                  <div className="fw-bold small">{currentUser.firstName} {currentUser.lastName}</div>
+                  <div className="text-muted small">@{currentUser.username}</div>
+                </div>
+              </div>
+            </div>
           )}
+        </div>
+      </aside>
+
+      {/* Mobile Header - Shows when desktop sidebar is hidden */}
+      <header className="mobile-header d-lg-none">
+        <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+          <div className="container-fluid px-3">
+            <Link className="navbar-brand" to="/" onClick={closeMobileNav}>
+              <Logo width={120} height={32} />
+            </Link>
+            
+            <button 
+              className="navbar-toggler border-0" 
+              type="button" 
+              data-bs-toggle="collapse" 
+              data-bs-target="#mobileNav" 
+              aria-controls="mobileNav" 
+              aria-expanded="false" 
+              aria-label="Toggle navigation"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            
+            <div className="collapse navbar-collapse" id="mobileNav">
+              <ul className="navbar-nav ms-auto">
+                <li className="nav-item">
+                  <Link 
+                    className={`nav-link ${location.pathname === "/" ? "active" : ""}`} 
+                    to="/"
+                    onClick={closeMobileNav}
+                  >
+                    <i className="bi bi-house-door-fill me-2"></i>
+                    Home
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link 
+                    className={`nav-link ${location.pathname === "/explore" ? "active" : ""}`} 
+                    to="/explore"
+                    onClick={closeMobileNav}
+                  >
+                    <i className="bi bi-search me-2"></i>
+                    Explore
+                  </Link>
+                </li>
+                {currentUser && (
+                  <li className="nav-item">
+                    <Link 
+                      className={`nav-link ${location.pathname.startsWith("/user/") ? "active" : ""}`} 
+                      to={`/user/${currentUser.id}`}
+                      onClick={closeMobileNav}
+                    >
+                      <i className="bi bi-person-fill me-2"></i>
+                      Profile
+                    </Link>
+                  </li>
+                )}
+              </ul>
+              
+              {currentUser && (
+                <div className="navbar-text ms-3 d-flex align-items-center">
+                  <div className="profile-avatar me-2" style={{ width: 32, height: 32, fontSize: "1rem" }}>
+                    {currentUser.firstName?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <span className="small">
+                    {currentUser.firstName} {currentUser.lastName}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </nav>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }
