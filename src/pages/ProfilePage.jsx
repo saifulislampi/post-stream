@@ -4,7 +4,7 @@ import { fetchPostsWithAuthor } from "../services/PostService";
 import { fetchUserById } from "../services/UserService";
 import { isFollowing, followUser, unfollowUser } from "../services/FollowService";
 import Spinner from "../components/shared/Spinner";
-import PostItem from "../components/posts/PostItem";
+import PostList from "../components/posts/PostList";
 
 import "../styles/ProfilePage.css"; // Assuming you have some styles for the profile page
 
@@ -190,32 +190,7 @@ export default function ProfilePage() {
 
       {/* Posts Section */}
       <div className="profile-posts">
-        {posts && posts.length > 0 ? (
-          <div className="post-list">
-            {posts.map((post) => (
-              <PostItem key={post.id} post={post} />
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <div className="text-center p-5">
-              <i
-                className="bi bi-chat-square-text"
-                style={{ fontSize: "3rem", color: "var(--text-tertiary)" }}
-              ></i>
-              <h3 className="h5 mt-3 mb-2">
-                {isOwnProfile
-                  ? "You haven't posted anything yet"
-                  : "No posts yet"}
-              </h3>
-              <p className="text-muted">
-                {isOwnProfile
-                  ? "When you post something, it will show up here."
-                  : "When they post something, it will show up here."}
-              </p>
-            </div>
-          </div>
-        )}
+        <PostList posts={posts || []} />
       </div>
     </div>
   );
