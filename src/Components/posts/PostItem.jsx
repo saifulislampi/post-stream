@@ -2,21 +2,13 @@ import React from "react";
 import { Link } from "react-router-dom";
 import PostActionBar from "./PostActionBar";
 
-// Helper function to format timestamp in social media style
 function formatTimestamp(date) {
   const now = new Date();
-  const diff = Math.floor((now - new Date(date)) / 1000); // Difference in seconds
-
-  if (diff < 60) return `${diff} seconds ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
-
-  // If older than a day, show the date
-  return new Date(date).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const diff = Math.floor((now - new Date(date)) / 1000);
+  if (diff < 60) return `${diff}s`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
+  return new Date(date).toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
 export default function PostItem({ post }) {
@@ -27,63 +19,34 @@ export default function PostItem({ post }) {
       : user.firstName || user.lastName
       ? user.firstName || user.lastName
       : "Loading...";
-
   const formattedTimestamp = formatTimestamp(post.createdAt);
 
   return (
-    <li className="post-card">
-      <div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "4px",
-            marginBottom: "4px",
-          }}
-        >
+    <div className="card post-card mb-3">
+      <div className="card-body">
+        <div className="d-flex align-items-center mb-2">
           <strong>
-            <Link
-              to={`/user/${user.id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
+            <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
               {fullName}
             </Link>
           </strong>
           {user.username && (
-            <span style={{ color: "var(--text-muted, #6b7280)" }}>
-              <Link
-                to={`/user/${user.id}`}
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
+            <span className="text-muted ms-2">
+              <Link to={`/user/${user.id}`} className="text-decoration-none text-reset">
                 @{user.username}
               </Link>
             </span>
           )}
-          <span style={{ color: "var(--text-muted, #6b7280)" }}>
-            {" "}
-            · #{post.tag || "general"}
-          </span>
-          <span style={{ color: "var(--text-muted, #6b7280)" }}>
-            {" "}
-            ·{" "}
-            <Link
-              to={`/post/${post.id}`}
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
+          <span className="text-muted ms-2"> · #{post.tag || "general"}</span>
+          <span className="text-muted ms-2">
+            <Link to={`/post/${post.id}`} className="text-decoration-none text-reset">
               {formattedTimestamp}
             </Link>
           </span>
         </div>
-        <p>
-          <Link
-            to={`/post/${post.id}`}
-            style={{ textDecoration: "none", color: "inherit" }}
-          >
-            {post.body}
-          </Link>
-        </p>
+        <p className="card-text">{post.body}</p>
+        <PostActionBar />
       </div>
-      <PostActionBar />
-    </li>
+    </div>
   );
 }
