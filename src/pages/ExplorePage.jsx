@@ -47,8 +47,8 @@ export default function ExplorePage() {
       return (
         post.body.toLowerCase().includes(lowerTerm) ||
         post.tag.toLowerCase().includes(lowerTerm) ||
-        (post.user &&
-          `${post.user.firstName} ${post.user.lastName}`
+        (post.author &&
+          `${post.author.firstName} ${post.author.lastName}`
             .toLowerCase()
             .includes(lowerTerm))
       );

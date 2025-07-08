@@ -81,10 +81,10 @@ export default function PostDetail() {
   if (error) return <div className="alert alert-danger p-4">{error}</div>;
   if (!post) return <div className="alert alert-warning p-4">Post not found</div>;
 
-  const user = post.user || {};
-  const fullName = user.firstName && user.lastName 
-    ? `${user.firstName} ${user.lastName}` 
-    : user.firstName || user.lastName || "Unknown User";
+  const postAuthor = post.author || {};
+  const fullName = postAuthor.firstName && postAuthor.lastName 
+    ? `${postAuthor.firstName} ${postAuthor.lastName}` 
+    : postAuthor.firstName || postAuthor.lastName || "Unknown User";
 
   return (
     <div className="post-detail">
@@ -108,13 +108,13 @@ export default function PostDetail() {
       <div className="post-detail-content">
         <div className="post-detail-main">
           <div className="user-avatar me-3" style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}>
-            {user.firstName?.[0]?.toUpperCase() || "?"}
+            {postAuthor.firstName?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="flex-grow-1">
             <div className="d-flex align-items-center mb-1">
               <span className="fw-bold me-2">{fullName}</span>
-              {user.username && (
-                <span className="text-muted">@{user.username}</span>
+              {postAuthor.username && (
+                <span className="text-muted">@{postAuthor.username}</span>
               )}
             </div>
           </div>
