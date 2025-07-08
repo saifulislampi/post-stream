@@ -5,24 +5,22 @@
 import Parse from 'parse';
 import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from '../environments.js';
 
-// Initialize Parse (if not already initialized)
+// Initialize Parse
 if (!Parse.applicationId) {
   Parse.initialize(APPLICATION_ID, JAVASCRIPT_KEY);
   Parse.serverURL = SERVER_URL;
 }
 
 /**
- * Check if user is following another user
- * @param {string} followerId - ID of user doing the following
- * @param {string} followingId - ID of user being followed
- * @returns {Promise<boolean>} - Whether followerId is following followingId
+ * Check if profile is following another profile
  */
-export const isFollowing = async (followerId, followingId) => {
+export const isFollowing = async (followerProfileId, followingProfileId) => {
   try {
-    const FollowQuery = new Parse.Query('Follow');
-    FollowQuery.equalTo('followerId', followerId);
-    FollowQuery.equalTo('followingId', followingId);
-    const follow = await FollowQuery.first();
+    const Follow = Parse.Object.extend('Follow');
+    const query = new Parse.Query(Follow);
+    query.equalTo('followerId', followerProfileId);
+    query.equalTo('followingId', followingProfileId);
+    const follow = await query.first();
     return !!follow;
   } catch (error) {
     console.error('Error checking follow status:', error);
@@ -31,79 +29,114 @@ export const isFollowing = async (followerId, followingId) => {
 };
 
 /**
- * Follow a user
- * @param {string} followerId - ID of user doing the following
- * @param {string} followingId - ID of user to follow
- * @returns {Promise<boolean>} - Success status
+ * Follow a profile
  */
-export const followUser = async (followerId, followingId) => {
+export const followProfile = async (followerProfile, followingProfile) => {
   try {
     // Check if already following
-    const alreadyFollowing = await isFollowing(followerId, followingId);
+    const alreadyFollowing = await isFollowing(followerProfile.id, followingProfile.id);
     if (alreadyFollowing) return false;
-
+    
     // Create follow relationship
     const Follow = Parse.Object.extend('Follow');
     const follow = new Follow();
-    follow.set('followerId', followerId);
-    follow.set('followingId', followingId);
+    
+    follow.set('followerId', followerProfile.id);
+    follow.set('followerUsername', followerProfile.get('username'));
+    follow.set('followingId', followingProfile.id);
+    follow.set('followingUsername', followingProfile.get('username'));
+    
     await follow.save();
-
+    
     // Update counts
-    const followerQuery = new Parse.Query('AppUser');
-    const followingQuery = new Parse.Query('AppUser');
+    followerProfile.increment('followingCount');
+    followingProfile.increment('followersCount');
     
-    const [follower, following] = await Promise.all([
-      followerQuery.get(followerId),
-      followingQuery.get(followingId)
-    ]);
-
-    follower.increment('followingCount');
-    following.increment('followersCount');
-    
-    await Promise.all([follower.save(), following.save()]);
+    await Parse.Object.saveAll([followerProfile, followingProfile]);
     
     return true;
   } catch (error) {
-    console.error('Error following user:', error);
-    return false;
+    console.error('Error following profile:', error);
+    throw error;
   }
 };
 
 /**
- * Unfollow a user
- * @param {string} followerId - ID of user doing the unfollowing
- * @param {string} followingId - ID of user to unfollow
- * @returns {Promise<boolean>} - Success status
+ * Unfollow a profile
  */
-export const unfollowUser = async (followerId, followingId) => {
+export const unfollowProfile = async (followerProfile, followingProfile) => {
   try {
-    const FollowQuery = new Parse.Query('Follow');
-    FollowQuery.equalTo('followerId', followerId);
-    FollowQuery.equalTo('followingId', followingId);
-    const follow = await FollowQuery.first();
+    // Find follow relationship
+    const Follow = Parse.Object.extend('Follow');
+    const query = new Parse.Query(Follow);
+    query.equalTo('followerId', followerProfile.id);
+    query.equalTo('followingId', followingProfile.id);
+    const follow = await query.first();
     
     if (!follow) return false;
-
+    
+    // Delete follow relationship
     await follow.destroy();
-
+    
     // Update counts
-    const followerQuery = new Parse.Query('AppUser');
-    const followingQuery = new Parse.Query('AppUser');
+    followerProfile.increment('followingCount', -1);
+    followingProfile.increment('followersCount', -1);
     
-    const [follower, following] = await Promise.all([
-      followerQuery.get(followerId),
-      followingQuery.get(followingId)
-    ]);
-
-    follower.increment('followingCount', -1);
-    following.increment('followersCount', -1);
-    
-    await Promise.all([follower.save(), following.save()]);
+    await Parse.Object.saveAll([followerProfile, followingProfile]);
     
     return true;
   } catch (error) {
-    console.error('Error unfollowing user:', error);
-    return false;
+    console.error('Error unfollowing profile:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get followers of a profile
+ */
+export const getFollowers = async (profileId, limit = 20, skip = 0) => {
+  try {
+    const Follow = Parse.Object.extend('Follow');
+    const query = new Parse.Query(Follow);
+    query.equalTo('followingId', profileId);
+    query.limit(limit);
+    query.skip(skip);
+    query.descending('createdAt');
+    
+    const follows = await query.find();
+    return follows.map(follow => ({
+      id: follow.id,
+      followerId: follow.get('followerId'),
+      followerUsername: follow.get('followerUsername'),
+      createdAt: follow.get('createdAt')
+    }));
+  } catch (error) {
+    console.error('Error getting followers:', error);
+    return [];
+  }
+};
+
+/**
+ * Get profiles that a profile is following
+ */
+export const getFollowing = async (profileId, limit = 20, skip = 0) => {
+  try {
+    const Follow = Parse.Object.extend('Follow');
+    const query = new Parse.Query(Follow);
+    query.equalTo('followerId', profileId);
+    query.limit(limit);
+    query.skip(skip);
+    query.descending('createdAt');
+    
+    const follows = await query.find();
+    return follows.map(follow => ({
+      id: follow.id,
+      followingId: follow.get('followingId'),
+      followingUsername: follow.get('followingUsername'),
+      createdAt: follow.get('createdAt')
+    }));
+  } catch (error) {
+    console.error('Error getting following:', error);
+    return [];
   }
 };

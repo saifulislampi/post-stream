@@ -17,12 +17,15 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 import { fetchPostsWithAuthor, createPost } from "./services/posts";
 import { getCurrentUser } from "./components/auth/AuthService";
+import { fetchProfileByUserId } from "./services/profiles";
 
 export default function App() {
   // State for all posts loaded from backend
   const [posts, setPosts] = useState(null);
   // State for the currently logged-in user via Parse
   const [currentUser, setCurrentUser] = useState(null);
+  // Add state for current profile
+  const [currentProfile, setCurrentProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +36,14 @@ export default function App() {
         setCurrentUser(user);
         
         if (user) {
+          // Fetch user's profile
+          try {
+            const profile = await fetchProfileByUserId(user.id);
+            setCurrentProfile(profile);
+          } catch (error) {
+            console.error('Error fetching profile:', error);
+          }
+          
           // Only fetch posts if user is authenticated
           const postsData = await fetchPostsWithAuthor();
           setPosts(postsData);
@@ -49,13 +60,20 @@ export default function App() {
 
   // Handler to add a new post (called from PostForm)
   const handleAdd = async (raw) => {
-    // TODO: Add image upload support in future
-    const saved = await createPost({
-      ...raw,
-      userId: currentUser?.id || "user1",
-      user: currentUser,
-    });
-    setPosts([saved, ...(posts ?? [])]);
+    if (!currentProfile) return;
+    
+    try {
+      const saved = await createPost(
+        {
+          ...raw,
+          tag: raw.tag || 'general'
+        }, 
+        currentProfile
+      );
+      setPosts([saved, ...(posts ?? [])]);
+    } catch (error) {
+      console.error('Error creating post:', error);
+    }
   };
 
   // Show loading spinner while initializing
@@ -73,21 +91,19 @@ export default function App() {
         <Route path="/" element={
           <ProtectedRoute>
             <>
-              {/* Header contains logo, navigation, and logout */}
-              <Header currentUser={currentUser} />
+              {/* Pass both user and profile */}
+              <Header currentUser={currentUser} currentProfile={currentProfile} />
               
               <div className="container-fluid p-0">
                 <div className="row g-0 justify-content-center">
-                  {/* Main Content: Timeline, PostPage, ProfilePage, ExplorePage */}
                   <main className="col-12 col-lg-6 col-xl-5 main-content">
                     <Timeline
                       posts={posts}
                       onAdd={handleAdd}
                       currentUser={currentUser}
+                      currentProfile={currentProfile}
                     />
                   </main>
-                  
-                  {/* Right Sidebar: trending, suggestions, etc. */}
                   <RightSidebar />
                 </div>
               </div>
@@ -98,11 +114,11 @@ export default function App() {
         <Route path="/post/:id" element={
           <ProtectedRoute>
             <>
-              <Header currentUser={currentUser} />
+              <Header currentUser={currentUser} currentProfile={currentProfile} />
               <div className="container-fluid p-0">
                 <div className="row g-0 justify-content-center">
                   <main className="col-12 col-lg-6 col-xl-5 main-content">
-                    <PostPage />
+                    <PostPage currentProfile={currentProfile} />
                   </main>
                   <RightSidebar />
                 </div>
@@ -111,30 +127,39 @@ export default function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/user/:userId" element={
+        {/* Change from /user/:userId to /profile/:profileId */}
+        <Route path="/profile/:profileId" element={
           <ProtectedRoute>
             <>
-              <Header currentUser={currentUser} />
+              <Header currentUser={currentUser} currentProfile={currentProfile} />
               <div className="container-fluid p-0">
                 <div className="row g-0 justify-content-center">
                   <main className="col-12 col-lg-6 col-xl-5 main-content">
-                    <ProfilePage />
+                    <ProfilePage currentProfile={currentProfile} />
                   </main>
                   <RightSidebar />
                 </div>
               </div>
             </>
           </ProtectedRoute>
+        } />
+        
+        {/* Add redirect from old path to new path for backward compatibility */}
+        <Route path="/user/:userId" element={
+          <Navigate to={(location) => {
+            const userId = location.pathname.split('/').pop();
+            return `/profile/${userId}`;
+          }} replace />
         } />
         
         <Route path="/explore" element={
           <ProtectedRoute>
             <>
-              <Header currentUser={currentUser} />
+              <Header currentUser={currentUser} currentProfile={currentProfile} />
               <div className="container-fluid p-0">
                 <div className="row g-0 justify-content-center">
                   <main className="col-12 col-lg-6 col-xl-5 main-content">
-                    <ExplorePage />
+                    <ExplorePage currentProfile={currentProfile} />
                   </main>
                   <RightSidebar />
                 </div>

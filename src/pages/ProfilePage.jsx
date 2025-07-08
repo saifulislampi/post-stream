@@ -1,98 +1,145 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchPostsWithAuthor } from "../services/posts";
-import { fetchUserById } from "../services/users";
-import { isFollowing, followUser, unfollowUser } from "../services/follows";
+import { fetchProfileById, fetchProfileByUserId } from "../services/profiles";
+import { isFollowing, followProfile, unfollowProfile } from "../services/follows";
+import { getCurrentUser } from "../components/auth/AuthService";
 import Spinner from "../components/shared/Spinner";
 import PostList from "../components/posts/PostList";
 
-import "../styles/ProfilePage.css"; // Assuming you have some styles for the profile page
+import "../styles/ProfilePage.css"; 
 
-// TODO: Consider adding user bio and location fields in the future
-function getInitials(user) {
-  if (!user) return "?";
-  if (user.firstName && user.lastName)
-    return user.firstName[0].toUpperCase() + user.lastName[0].toUpperCase();
-  if (user.firstName) return user.firstName[0].toUpperCase();
-  if (user.lastName) return user.lastName[0].toUpperCase();
+// Helper function to get user initials for avatar
+function getInitials(profile) {
+  if (!profile) return "?";
+  if (profile.firstName && profile.lastName)
+    return profile.firstName[0].toUpperCase() + profile.lastName[0].toUpperCase();
+  if (profile.firstName) return profile.firstName[0].toUpperCase();
+  if (profile.lastName) return profile.lastName[0].toUpperCase();
   return "?";
 }
 
 export default function ProfilePage() {
-  const { userId } = useParams();
+  const { profileId } = useParams(); // Changed from userId to profileId
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  
+  const [profile, setProfile] = useState(null);
+  const [currentProfile, setCurrentProfile] = useState(null);
   const [posts, setPosts] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [isFollowingUser, setIsFollowingUser] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
   const [isHoveringFollow, setIsHoveringFollow] = useState(false);
 
+  // Get current user profile on component mount
   useEffect(() => {
-    // TODO: Add error handling for failed user fetch
-    const storedUserId = localStorage.getItem("currentUserId");
-    if (storedUserId) {
-      setCurrentUserId(storedUserId);
-    } else {
-      import("../services/users").then(({ fetchFirstUser }) => {
-        fetchFirstUser().then((user) => {
-          if (user) {
-            localStorage.setItem("currentUserId", user.id);
-            setCurrentUserId(user.id);
-          }
-        });
-      });
-    }
+    const loadCurrentProfile = async () => {
+      try {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          const currentUserProfile = await fetchProfileByUserId(currentUser.id);
+          setCurrentProfile(currentUserProfile);
+        }
+      } catch (error) {
+        console.error("Error loading current profile:", error);
+      }
+    };
+    
+    loadCurrentProfile();
   }, []);
 
+  // Load profile and posts when profileId changes
   useEffect(() => {
     document.title = "Profile - Post Stream";
     setLoading(true);
-    // TODO: Optimize to avoid unnecessary fetches on every userId/currentUserId change
-    Promise.all([fetchUserById(userId), fetchPostsWithAuthor()])
-      .then(([userData, allPosts]) => {
-        setUser(userData);
-        setPosts(allPosts.filter((p) => p.userId === userId));
-        if (currentUserId && currentUserId !== userId) {
-          isFollowing(currentUserId, userId).then(setIsFollowingUser);
+    
+    const loadProfileAndPosts = async () => {
+      try {
+        let profileData = null;
+        
+        // First try to fetch by Profile ID
+        try {
+          profileData = await fetchProfileById(profileId);
+        } catch (error) {
+          console.log("Not a Profile ID, trying as User ID...");
         }
-      })
-      .finally(() => setLoading(false));
-  }, [userId, currentUserId]);
+        
+        // If that fails, try to fetch by User ID
+        if (!profileData) {
+          try {
+            profileData = await fetchProfileByUserId(profileId);
+            
+            // If successful, redirect to the correct profile URL
+            if (profileData && profileData.id !== profileId) {
+              navigate(`/profile/${profileData.id}`, { replace: true });
+              return;
+            }
+          } catch (error) {
+            console.error("Error fetching profile by User ID:", error);
+          }
+        }
+        
+        if (!profileData) {
+          console.error("Profile not found for ID:", profileId);
+          setLoading(false);
+          return;
+        }
+        
+        setProfile(profileData);
+        
+        // Get posts by this profile
+        const allPosts = await fetchPostsWithAuthor();
+        setPosts(allPosts.filter(p => p.authorId === profileData.id));
+        
+        // Check if current user is following this profile
+        if (currentProfile && currentProfile.id !== profileData.id) {
+          const following = await isFollowing(currentProfile.id, profileData.id);
+          setIsFollowingUser(following);
+        }
+      } catch (error) {
+        console.error("Error loading profile data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (profileId) {
+      loadProfileAndPosts();
+    }
+  }, [profileId, currentProfile, navigate]);
 
   const handleFollowToggle = async () => {
-    if (!currentUserId) return;
+    if (!currentProfile) return;
     setFollowLoading(true);
+    
     try {
       if (isFollowingUser) {
-        await unfollowUser(currentUserId, userId);
+        await unfollowProfile(currentProfile, profile);
         setIsFollowingUser(false);
-        setUser((prev) => ({
+        setProfile((prev) => ({
           ...prev,
           followersCount: Math.max(0, (prev.followersCount || 0) - 1),
         }));
       } else {
-        await followUser(currentUserId, userId);
+        await followProfile(currentProfile, profile);
         setIsFollowingUser(true);
-        setUser((prev) => ({
+        setProfile((prev) => ({
           ...prev,
           followersCount: (prev.followersCount || 0) + 1,
         }));
       }
     } catch (err) {
-      // TODO: Show user feedback on follow/unfollow error
       console.error("Follow action failed:", err);
+      // TODO: Show user feedback on follow/unfollow error
     } finally {
       setFollowLoading(false);
     }
   };
 
   if (loading) return <Spinner />;
-  if (!user)
-    return <div className="alert alert-warning p-3">User not found</div>;
+  if (!profile) return <div className="alert alert-warning p-3">Profile not found</div>;
 
-  const isOwnProfile = currentUserId === userId;
+  const isOwnProfile = currentProfile?.id === profile.id;
 
   return (
     <div className="profile-page">
@@ -108,7 +155,7 @@ export default function ProfilePage() {
           </button>
           <div>
             <h1 className="h4 mb-0 fw-bold">
-              {user.firstName} {user.lastName}
+              {profile.firstName} {profile.lastName}
             </h1>
             <div className="text-muted small">{posts?.length || 0} posts</div>
           </div>
@@ -118,24 +165,26 @@ export default function ProfilePage() {
       {/* Profile Info Section */}
       <div className="profile-info">
         <div className="profile-banner">
-          {/* You can add a banner image here later */}
+          {profile.coverImage && (
+            <img src={profile.coverImage} alt="cover" className="w-100 h-100 object-cover" />
+          )}
         </div>
 
         <div className="profile-details">
           <div className="d-flex justify-content-between align-items-start mb-3">
             <div className="profile-avatar-large">
-              {user.imageUrl ? (
+              {profile.avatar ? (
                 <img
-                  src={user.imageUrl}
+                  src={profile.avatar}
                   alt="profile"
                   className="w-100 h-100 rounded-circle"
                 />
               ) : (
-                getInitials(user)
+                getInitials(profile)
               )}
             </div>
 
-            {!isOwnProfile && (
+            {!isOwnProfile && currentProfile && (
               <button
                 onMouseEnter={() => setIsHoveringFollow(true)}
                 onMouseLeave={() => setIsHoveringFollow(false)}
@@ -156,19 +205,25 @@ export default function ProfilePage() {
 
           <div className="profile-user-info">
             <h2 className="profile-name">
-              {user.firstName} {user.lastName}
+              {profile.firstName} {profile.lastName}
             </h2>
             <div className="profile-handle">
-              @{user.username || `user${user.id.substring(0, 4)}`}
+              @{profile.username}
             </div>
+
+            {profile.bio && (
+              <div className="profile-bio mb-2">
+                {profile.bio}
+              </div>
+            )}
 
             <div className="profile-stats">
               <div className="stat-item">
-                <span className="stat-number">{user.followingCount || 0}</span>
+                <span className="stat-number">{profile.followingCount || 0}</span>
                 <span className="stat-label">Following</span>
               </div>
               <div className="stat-item">
-                <span className="stat-number">{user.followersCount || 0}</span>
+                <span className="stat-number">{profile.followersCount || 0}</span>
                 <span className="stat-label">Followers</span>
               </div>
             </div>

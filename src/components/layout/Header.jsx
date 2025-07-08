@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../auth/AuthService";
 import Logo from "./Logo";
 
-export default function Header({ currentUser }) {
+export default function Header({ currentUser, currentProfile }) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -49,25 +49,25 @@ export default function Header({ currentUser }) {
               <i className="bi bi-search"></i>
               <span>Explore</span>
             </Link>
-            {currentUser && (
+            {currentProfile && (
               <Link 
-                to={`/user/${currentUser.id}`} 
-                className={`nav-link ${location.pathname.startsWith("/user/") ? "active" : ""}`}
+                to={`/profile/${currentProfile.id}`} 
+                className={`nav-link ${location.pathname.startsWith("/profile/") ? "active" : ""}`}
               >
                 <i className="bi bi-person-fill"></i>
                 <span>Profile</span>
               </Link>
             )}
           </nav>
-          {currentUser && (
+          {currentProfile && (
             <div className="mt-auto mb-3">
               <div className="user-info-card">
                 <div className="profile-avatar me-3" style={{ width: 40, height: 40, fontSize: "1.2rem" }}>
-                  {currentUser.firstName?.[0]?.toUpperCase() || "?"}
+                  {currentProfile.firstName?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div className="flex-grow-1">
-                  <div className="fw-bold small">{currentUser.firstName} {currentUser.lastName}</div>
-                  <div className="text-muted small">@{currentUser.username}</div>
+                  <div className="fw-bold small">{currentProfile.firstName} {currentProfile.lastName}</div>
+                  <div className="text-muted small">@{currentProfile.username}</div>
                 </div>
               </div>
               <button 
@@ -124,11 +124,11 @@ export default function Header({ currentUser }) {
                     Explore
                   </Link>
                 </li>
-                {currentUser && (
+                {currentProfile && (
                   <li className="nav-item">
                     <Link 
-                      className={`nav-link ${location.pathname.startsWith("/user/") ? "active" : ""}`} 
-                      to={`/user/${currentUser.id}`}
+                      className={`nav-link ${location.pathname.startsWith("/profile/") ? "active" : ""}`} 
+                      to={`/profile/${currentProfile.id}`}
                       onClick={closeMobileNav}
                     >
                       <i className="bi bi-person-fill me-2"></i>
@@ -138,13 +138,13 @@ export default function Header({ currentUser }) {
                 )}
               </ul>
               
-              {currentUser && (
+              {currentProfile && (
                 <div className="navbar-text ms-3 d-flex align-items-center">
                   <div className="profile-avatar me-2" style={{ width: 32, height: 32, fontSize: "1rem" }}>
-                    {currentUser.firstName?.[0]?.toUpperCase() || "?"}
+                    {currentProfile.firstName?.[0]?.toUpperCase() || "?"}
                   </div>
                   <span className="small me-2">
-                    {currentUser.firstName} {currentUser.lastName}
+                    {currentProfile.firstName} {currentProfile.lastName}
                   </span>
                   <button 
                     className="btn btn-outline-secondary btn-sm" 

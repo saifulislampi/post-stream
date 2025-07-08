@@ -1,60 +1,122 @@
 /**
  * Clean up Back4App database
  */
-
 const Parse = require('parse/node');
 
 // Back4App configuration
 const APPLICATION_ID = "3gMH4Kq9ALoTgvRaYN0STLZPBRBrw6HzlIqytZzf";
 const JAVASCRIPT_KEY = "V1OcAlaeBrZwruPBmMjT2d0nIZ1r5rSI7ONSSPKN";
+const MASTER_KEY = "neaO4TBGd5NKjtuDRjEt7Sqazr32LmyLYp06A9Wg";
 const SERVER_URL = "https://parseapi.back4app.com/";
 
-// Initialize Parse
-Parse.initialize(APPLICATION_ID, JAVASCRIPT_KEY);
+// Initialize Parse with master key for cleanup
+Parse.initialize(APPLICATION_ID, JAVASCRIPT_KEY, MASTER_KEY);
 Parse.serverURL = SERVER_URL;
+Parse.masterKey = MASTER_KEY;
 
 async function cleanupDatabase() {
   try {
-    console.log('Starting database cleanup...');
+    console.log('🧹 Starting database cleanup...');
+    console.log('=====================================\n');
+
+    // Clean up in reverse dependency order
     
-    // Clean up all existing data
-    console.log('Cleaning up AppUsers...');
-    const UserQuery = new Parse.Query('AppUser');
-    const users = await UserQuery.find();
-    if (users.length > 0) {
-      await Parse.Object.destroyAll(users);
-      console.log(`Deleted ${users.length} users`);
-    }
-    
-    console.log('Cleaning up Posts...');
-    const PostQuery = new Parse.Query('Post');
-    const posts = await PostQuery.find();
-    if (posts.length > 0) {
-      await Parse.Object.destroyAll(posts);
-      console.log(`Deleted ${posts.length} posts`);
-    }
-    
+    // 1. Clean up Comments
     console.log('Cleaning up Comments...');
-    const CommentQuery = new Parse.Query('Comment');
-    const comments = await CommentQuery.find();
-    if (comments.length > 0) {
-      await Parse.Object.destroyAll(comments);
-      console.log(`Deleted ${comments.length} comments`);
+    try {
+      const CommentQuery = new Parse.Query('Comment');
+      CommentQuery.limit(1000);
+      const comments = await CommentQuery.find({ useMasterKey: true });
+      if (comments.length > 0) {
+        await Parse.Object.destroyAll(comments, { useMasterKey: true });
+        console.log(`✓ Deleted ${comments.length} comments`);
+      } else {
+        console.log('✓ No comments found');
+      }
+    } catch (error) {
+      console.error('✗ Error deleting comments:', error.message);
     }
 
-    console.log('Cleaning up Follow relationships...');
-    const FollowQuery = new Parse.Query('Follow');
-    const follows = await FollowQuery.find();
-    if (follows.length > 0) {
-      await Parse.Object.destroyAll(follows);
-      console.log(`Deleted ${follows.length} follow relationships`);
+    // 2. Clean up Follow relationships
+    console.log('\nCleaning up Follow relationships...');
+    try {
+      const FollowQuery = new Parse.Query('Follow');
+      FollowQuery.limit(1000);
+      const follows = await FollowQuery.find({ useMasterKey: true });
+      if (follows.length > 0) {
+        await Parse.Object.destroyAll(follows, { useMasterKey: true });
+        console.log(`✓ Deleted ${follows.length} follow relationships`);
+      } else {
+        console.log('✓ No follow relationships found');
+      }
+    } catch (error) {
+      console.error('✗ Error deleting follows:', error.message);
     }
+
+    // 3. Clean up Posts
+    console.log('\nCleaning up Posts...');
+    try {
+      const PostQuery = new Parse.Query('Post');
+      PostQuery.limit(1000);
+      const posts = await PostQuery.find({ useMasterKey: true });
+      if (posts.length > 0) {
+        await Parse.Object.destroyAll(posts, { useMasterKey: true });
+        console.log(`✓ Deleted ${posts.length} posts`);
+      } else {
+        console.log('✓ No posts found');
+      }
+    } catch (error) {
+      console.error('✗ Error deleting posts:', error.message);
+    }
+
+    // 4. Clean up Profiles
+    console.log('\nCleaning up Profiles...');
+    try {
+      const ProfileQuery = new Parse.Query('Profile');
+      ProfileQuery.limit(1000);
+      const profiles = await ProfileQuery.find({ useMasterKey: true });
+      if (profiles.length > 0) {
+        await Parse.Object.destroyAll(profiles, { useMasterKey: true });
+        console.log(`✓ Deleted ${profiles.length} profiles`);
+      } else {
+        console.log('✓ No profiles found');
+      }
+    } catch (error) {
+      console.error('✗ Error deleting profiles:', error.message);
+    }
+
+    // 5. Clean up Parse Users
+    console.log('\nCleaning up Parse Users...');
+    try {
+      const UserQuery = new Parse.Query(Parse.User);
+      UserQuery.limit(1000);
+      const users = await UserQuery.find({ useMasterKey: true });
+      if (users.length > 0) {
+        // Delete users one by one with master key
+        for (const user of users) {
+          await user.destroy({ useMasterKey: true });
+        }
+        console.log(`✓ Deleted ${users.length} Parse users`);
+      } else {
+        console.log('✓ No Parse users found');
+      }
+    } catch (error) {
+      console.error('✗ Error deleting Parse users:', error.message);
+      console.log('  Note: You may need to delete users manually from Back4App dashboard');
+    }
+
+    console.log('\n✅ Database cleanup completed!');
     
-    console.log('Database cleanup completed successfully!');
   } catch (error) {
-    console.error('Error cleaning database:', error);
+    console.error('❌ Error during cleanup:', error);
   }
 }
 
 // Run the cleanup
-cleanupDatabase();
+cleanupDatabase().then(() => {
+  console.log('\nExiting...');
+  process.exit(0);
+}).catch((error) => {
+  console.error('Cleanup failed:', error);
+  process.exit(1);
+});

@@ -12,10 +12,10 @@ function formatTimestamp(date) {
 }
 
 export default function PostItem({ post }) {
-  const user = post.user || {};
-  const fullName = user.firstName && user.lastName 
-    ? `${user.firstName} ${user.lastName}` 
-    : user.firstName || user.lastName || "Unknown User";
+  const postAuthor = post.author || {};
+  const fullName = postAuthor.firstName && postAuthor.lastName 
+    ? `${postAuthor.firstName} ${postAuthor.lastName}` 
+    : postAuthor.firstName || postAuthor.lastName || "Unknown User";
   const formattedTimestamp = formatTimestamp(post.createdAt);
 
   return (
@@ -23,9 +23,9 @@ export default function PostItem({ post }) {
       <div className="post-content">
         <div className="d-flex gap-3">
           {/* Avatar */}
-          <Link to={`/user/${user.id}`} className="text-decoration-none">
+          <Link to={`/profile/${postAuthor.id}`} className="text-decoration-none">
             <div className="profile-avatar" style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}>
-              {user.firstName?.[0]?.toUpperCase() || "?"}
+              {postAuthor.firstName?.[0]?.toUpperCase() || "?"}
             </div>
           </Link>
           
@@ -33,11 +33,11 @@ export default function PostItem({ post }) {
           <div className="flex-grow-1 min-width-0">
             {/* User Info */}
             <div className="d-flex align-items-center gap-1 mb-1">
-              <Link to={`/user/${user.id}`} className="text-decoration-none">
+              <Link to={`/profile/${postAuthor.id}`} className="text-decoration-none">
                 <span className="fw-bold text-dark">{fullName}</span>
               </Link>
-              {user.username && (
-                <span className="text-muted">@{user.username}</span>
+              {postAuthor.username && (
+                <span className="text-muted">@{postAuthor.username}</span>
               )}
               <span className="text-muted">·</span>
               <Link to={`/post/${post.id}`} className="text-decoration-none">
