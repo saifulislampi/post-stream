@@ -20,36 +20,39 @@ const INITIAL_USERS = [
     lastName: "Doe",
     email: "jane@example.com",
     username: "janedoe",
+    password: "password123", // Added password for authentication
   },
   {
     firstName: "John",
     lastName: "Mayer",
     email: "john@example.com",
     username: "johnmayer",
+    password: "password123", // Added password for authentication
   },
   {
     firstName: "Ada",
     lastName: "Lovelace",
     email: "ada@example.com",
     username: "adalovelace",
+    password: "password123", // Added password for authentication
   },
 ];
 
 const INITIAL_POSTS = [
   {
-    userId: null,
+    username: "janedoe", // Reference user by username instead of userId
     body: "Excited to launch Postive – a tiny micro-blog built in six weeks!",
     tag: "general",
     imageName: null,
   },
   {
-    userId: null,
+    username: "johnmayer", // Reference user by username instead of userId
     body: "Coffee ☕ + code = perfect combo.",
     tag: "life",
     imageName: null,
   },
   {
-    userId: null,
+    username: "adalovelace", // Reference user by username instead of userId
     body: "Fun fact: a day on Venus is longer than its year.",
     tag: "fun",
     imageName: null,
@@ -78,24 +81,35 @@ async function seedUsers() {
   
   for (const userData of INITIAL_USERS) {
     try {
-      const AppUser = Parse.Object.extend('AppUser');
-      const user = new AppUser();
+      // Always try to find existing user first
+      const UserQuery = new Parse.Query(Parse.User);
+      UserQuery.equalTo('username', userData.username);
+      let user = await UserQuery.first();
       
-      user.set('firstName', userData.firstName);
-      user.set('lastName', userData.lastName);
-      user.set('email', userData.email);
-      user.set('username', userData.username); // Set username
-      user.set('followersCount', 0); // Initialize counter
-      user.set('followingCount', 0); // Initialize counter
-      
-      const savedUser = await user.save();
-      createdUsers.push(savedUser);
-      console.log(`Created user: ${userData.firstName} ${userData.lastName} (@${userData.username})`);
+      if (user) {
+        console.log(`User @${userData.username} already exists, using existing user`);
+        createdUsers.push(user);
+      } else {
+        // If user doesn't exist, create new one
+        user = new Parse.User();
+        user.setUsername(userData.username);
+        user.setPassword(userData.password);
+        user.setEmail(userData.email);
+        user.set('firstName', userData.firstName);
+        user.set('lastName', userData.lastName);
+        user.set('followersCount', 0);
+        user.set('followingCount', 0);
+        
+        const savedUser = await user.signUp();
+        createdUsers.push(savedUser);
+        console.log(`Created user: ${userData.firstName} ${userData.lastName} (@${userData.username})`);
+      }
     } catch (error) {
-      console.error(`Error creating user ${userData.firstName}:`, error.message);
+      console.error(`Error with user ${userData.username}:`, error.message);
     }
   }
   
+  console.log(`Found/created ${createdUsers.length} users`);
   return createdUsers;
 }
 
@@ -110,7 +124,15 @@ async function seedPosts(users) {
       const Post = Parse.Object.extend("Post");
       const post = new Post();
 
-      post.set("userId", users[i] ? users[i].id : users[0].id);
+      // Find user by username instead of using index
+      const user = users.find(u => u.get('username') === postData.username);
+      if (!user) {
+        console.error(`User with username ${postData.username} not found`);
+        continue;
+      }
+
+      post.set("userId", user.id);
+      post.set("username", postData.username); // Also store username for easier queries
       post.set("body", postData.body);
       post.set("tag", postData.tag);
       post.set("imageName", postData.imageName);
@@ -118,7 +140,7 @@ async function seedPosts(users) {
       const savedPost = await post.save();
       createdPosts.push(savedPost);
       console.log(
-        `Created post: ${postData.body.substring(0, 50)}... (ID: ${
+        `Created post by @${postData.username}: ${postData.body.substring(0, 50)}... (ID: ${
           savedPost.id
         })`
       );

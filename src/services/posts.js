@@ -14,6 +14,7 @@ const parseObjectToPlain = (parseObject) => {
   return {
     id: parseObject.id,
     userId: parseObject.get('userId'),
+    username: parseObject.get('username'), // Include username for easier queries
     body: parseObject.get('body'),
     tag: parseObject.get('tag'),
     imageName: parseObject.get('imageName'),
@@ -29,8 +30,8 @@ export const fetchPostsWithAuthor = async () => {
     PostQuery.descending('createdAt'); // Order by newest first
     const posts = await PostQuery.find();
     
-    // Query users from Back4App
-    const UserQuery = new Parse.Query('AppUser');
+    // Query users from Back4App using Parse.User
+    const UserQuery = new Parse.Query(Parse.User);
     const users = await UserQuery.find();
     
     // Convert Parse objects to plain objects
@@ -87,6 +88,7 @@ export const createPost = async (postData) => {
     const post = new Post();
     
     post.set('userId', postData.userId);
+    post.set('username', postData.user?.username || postData.username); // Store username
     post.set('body', postData.body);
     post.set('tag', postData.tag || 'general');
     post.set('imageName', postData.imageName || null);

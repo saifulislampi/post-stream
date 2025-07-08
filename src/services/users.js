@@ -31,7 +31,7 @@ const parseUserToPlain = (parseUser) => {
  */
 export const fetchFirstUser = async () => {
   try {
-    const UserQuery = new Parse.Query('AppUser');
+    const UserQuery = new Parse.Query(Parse.User);
     UserQuery.ascending('createdAt');
     UserQuery.limit(1);
     const user = await UserQuery.first();
@@ -52,7 +52,7 @@ export const fetchFirstUser = async () => {
 
 export const fetchUsers = async () => {
   try {
-    const UserQuery = new Parse.Query('AppUser');
+    const UserQuery = new Parse.Query(Parse.User);
     const users = await UserQuery.find();
     return users.map(parseUserToPlain);
   } catch (error) {
@@ -63,7 +63,7 @@ export const fetchUsers = async () => {
 
 export const fetchUserById = async (userId) => {
   try {
-    const UserQuery = new Parse.Query('AppUser');
+    const UserQuery = new Parse.Query(Parse.User);
     const user = await UserQuery.get(userId);
     return user ? parseUserToPlain(user) : null;
   } catch (error) {
@@ -74,7 +74,7 @@ export const fetchUserById = async (userId) => {
 
 export const fetchUsersByIds = async (userIds) => {
   try {
-    const UserQuery = new Parse.Query('AppUser');
+    const UserQuery = new Parse.Query(Parse.User);
     UserQuery.containedIn('objectId', userIds);
     const users = await UserQuery.find();
     return users.map(parseUserToPlain);

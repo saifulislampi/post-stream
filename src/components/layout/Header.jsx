@@ -1,10 +1,11 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { logout } from "../auth/AuthService";
 import Logo from "./Logo";
 
 export default function Header({ currentUser }) {
-  // TODO: Add notification bell and user dropdown in future
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Close mobile navbar when clicking on nav links
   const closeMobileNav = () => {
@@ -12,6 +13,16 @@ export default function Header({ currentUser }) {
     if (navbarCollapse && navbarCollapse.classList.contains('show')) {
       const bsCollapse = new window.bootstrap.Collapse(navbarCollapse);
       bsCollapse.hide();
+    }
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error logging out:", error);
     }
   };
 
@@ -59,6 +70,13 @@ export default function Header({ currentUser }) {
                   <div className="text-muted small">@{currentUser.username}</div>
                 </div>
               </div>
+              <button 
+                className="btn btn-outline-secondary btn-sm w-100 mt-2" 
+                onClick={handleLogout}
+              >
+                <i className="bi bi-box-arrow-right me-2"></i>
+                Logout
+              </button>
             </div>
           )}
         </div>
@@ -125,9 +143,15 @@ export default function Header({ currentUser }) {
                   <div className="profile-avatar me-2" style={{ width: 32, height: 32, fontSize: "1rem" }}>
                     {currentUser.firstName?.[0]?.toUpperCase() || "?"}
                   </div>
-                  <span className="small">
+                  <span className="small me-2">
                     {currentUser.firstName} {currentUser.lastName}
                   </span>
+                  <button 
+                    className="btn btn-outline-secondary btn-sm" 
+                    onClick={handleLogout}
+                  >
+                    <i className="bi bi-box-arrow-right"></i>
+                  </button>
                 </div>
               )}
             </div>
