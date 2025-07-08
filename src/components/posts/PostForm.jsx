@@ -17,7 +17,16 @@ export default function PostForm({ onAdd, currentUser }) {
     setImg(null);
   }
 
-  const userInitial = currentUser ? currentUser.firstName[0].toUpperCase() : "?";
+  // Fix: Handle Parse User object and potential undefined values
+  const getUserInitial = () => {
+    if (!currentUser) return "?";
+    
+    // For Parse User, access firstName using .get() method
+    const firstName = currentUser.get ? currentUser.get("firstName") : currentUser.firstName;
+    return firstName ? firstName[0].toUpperCase() : "?";
+  };
+
+  const userInitial = getUserInitial();
   const charLimit = 280;
   const remainingChars = charLimit - body.length;
 

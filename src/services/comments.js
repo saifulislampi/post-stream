@@ -5,7 +5,7 @@
 import Parse from 'parse';
 import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from '../environments.js';
 
-// Initialize Parse (if not already initialized)
+// Initialize Parse
 if (!Parse.applicationId) {
   Parse.initialize(APPLICATION_ID, JAVASCRIPT_KEY);
   Parse.serverURL = SERVER_URL;
@@ -16,7 +16,8 @@ const parseCommentToPlain = (parseComment) => {
   return {
     id: parseComment.id,
     postId: parseComment.get('postId'),
-    userId: parseComment.get('userId'),
+    authorId: parseComment.get('authorId'),
+    authorUsername: parseComment.get('authorUsername'),
     body: parseComment.get('body'),
     createdAt: parseComment.get('createdAt'),
     updatedAt: parseComment.get('updatedAt')
@@ -24,42 +25,77 @@ const parseCommentToPlain = (parseComment) => {
 };
 
 /**
- * Fetches comments for a specific post
- * @param {string|number} postId - The ID of the post
- * @returns {Promise<Array>} Array of comments for the post
+ * Fetch comments for a post
  */
-export const fetchCommentsByPost = async (postId) => {
+export const fetchCommentsByPost = async (postId, limit = 50, skip = 0) => {
   try {
-    const CommentQuery = new Parse.Query('Comment');
-    CommentQuery.equalTo('postId', postId.toString());
-    CommentQuery.ascending('createdAt'); // Order by oldest first for comments
-    const comments = await CommentQuery.find();
+    const Comment = Parse.Object.extend('Comment');
+    const query = new Parse.Query(Comment);
+    query.equalTo('postId', postId);
+    query.limit(limit);
+    query.skip(skip);
+    query.ascending('createdAt'); // Show oldest first for comments
+    
+    const comments = await query.find();
     return comments.map(parseCommentToPlain);
   } catch (error) {
-    console.error('Error fetching comments:', error);
-    // Return empty array instead of throwing to prevent UI from breaking
+    console.error(`Error fetching comments for post ${postId}:`, error);
     return [];
   }
 };
 
 /**
- * Creates a new comment
- * @param {Object} commentData - The comment data
- * @returns {Promise<Object>} The created comment
+ * Create a new comment
  */
-export const createComment = async (commentData) => {
+export const createComment = async (commentData, profile, post) => {
   try {
     const Comment = Parse.Object.extend('Comment');
     const comment = new Comment();
     
-    comment.set('postId', commentData.postId);
-    comment.set('userId', commentData.userId);
+    comment.set('postId', post.id);
+    comment.set('authorId', profile.id);
+    comment.set('authorUsername', profile.get('username'));
     comment.set('body', commentData.body);
     
     const savedComment = await comment.save();
+    
+    // Increment post's comment count
+    post.increment('commentsCount');
+    await post.save();
+    
     return parseCommentToPlain(savedComment);
   } catch (error) {
     console.error('Error creating comment:', error);
     throw error;
+  }
+};
+
+/**
+ * Fetch comments with author data
+ */
+export const fetchCommentsWithAuthor = async (postId, limit = 50, skip = 0) => {
+  try {
+    const comments = await fetchCommentsByPost(postId, limit, skip);
+    
+    // Get unique author IDs
+    const authorIds = [...new Set(comments.map(comment => comment.authorId))];
+    
+    // Import profile service to avoid circular dependencies
+    const { fetchProfilesByIds } = await import('./profiles.js');
+    
+    // Fetch author profiles
+    const profiles = await fetchProfilesByIds(authorIds);
+    
+    // Create a lookup map for O(1) access
+    const profileMap = new Map(profiles.map(profile => [profile.id, profile]));
+    
+    // Attach author data to comments
+    return comments.map(comment => ({
+      ...comment,
+      author: profileMap.get(comment.authorId) || null
+    }));
+  } catch (error) {
+    console.error(`Error fetching comments with author for post ${postId}:`, error);
+    return [];
   }
 };
