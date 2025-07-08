@@ -4,6 +4,7 @@
 
 import Parse from 'parse';
 import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from '../environments.js';
+import { getProfileObjectById } from "./profiles.js"; 
 
 // Initialize Parse
 if (!Parse.applicationId) {
@@ -12,19 +13,26 @@ if (!Parse.applicationId) {
 }
 
 /**
- * Check if profile is following another profile
+ * Find a follow relationship Parse.Object between two profiles
+ */
+export const findFollowObj = async (followerProfileId, followingProfileId) => {
+  const Follow = Parse.Object.extend('Follow');
+  const query = new Parse.Query(Follow);
+  query.equalTo('followerId', followerProfileId);
+  query.equalTo('followingId', followingProfileId);
+  return await query.first();
+};
+
+/** 
+ * * Check if a profile is following another profile
  */
 export const isFollowing = async (followerProfileId, followingProfileId) => {
   try {
-    const Follow = Parse.Object.extend('Follow');
-    const query = new Parse.Query(Follow);
-    query.equalTo('followerId', followerProfileId);
-    query.equalTo('followingId', followingProfileId);
-    const follow = await query.first();
-    return !!follow;
+    const follow = await findFollowObj(followerProfileId, followingProfileId);
+    return !!follow; // Returns true if follow exists, false otherwise
   } catch (error) {
-    console.error('Error checking follow status:', error);
-    return false;
+    console.error('Error checking follow relationship:', error);
+    return false; // In case of error, assume not following
   }
 };
 
@@ -34,26 +42,30 @@ export const isFollowing = async (followerProfileId, followingProfileId) => {
 export const followProfile = async (followerProfile, followingProfile) => {
   try {
     // Check if already following
-    const alreadyFollowing = await isFollowing(followerProfile.id, followingProfile.id);
-    if (alreadyFollowing) return false;
-    
+    if (await isFollowing(followerProfile.id, followingProfile.id)) {
+      return false; // Already following, no action needed
+    }
+
+    const followerProfileObject = await getProfileObjectById(followerProfile.id);
+    const followingProfileObject = await getProfileObjectById(followingProfile.id);
+
     // Create follow relationship
     const Follow = Parse.Object.extend('Follow');
     const follow = new Follow();
-    
-    follow.set('followerId', followerProfile.id);
-    follow.set('followerUsername', followerProfile.get('username'));
-    follow.set('followingId', followingProfile.id);
-    follow.set('followingUsername', followingProfile.get('username'));
-    
+
+    follow.set('followerId', followerProfileObject.id);
+    follow.set('followerUsername', followerProfileObject.get('username'));
+    follow.set('followingId', followingProfileObject.id);
+    follow.set('followingUsername', followingProfileObject.get('username'));
+
     await follow.save();
-    
+
     // Update counts
-    followerProfile.increment('followingCount');
-    followingProfile.increment('followersCount');
-    
-    await Parse.Object.saveAll([followerProfile, followingProfile]);
-    
+    followerProfileObject.increment('followingCount');
+    followingProfileObject.increment('followersCount');
+
+    await Parse.Object.saveAll([followerProfileObject, followingProfileObject]);
+
     return true;
   } catch (error) {
     console.error('Error following profile:', error);
@@ -66,24 +78,22 @@ export const followProfile = async (followerProfile, followingProfile) => {
  */
 export const unfollowProfile = async (followerProfile, followingProfile) => {
   try {
-    // Find follow relationship
-    const Follow = Parse.Object.extend('Follow');
-    const query = new Parse.Query(Follow);
-    query.equalTo('followerId', followerProfile.id);
-    query.equalTo('followingId', followingProfile.id);
-    const follow = await query.first();
-    
+    // Find follow relationship using common method
+    const follow = await findFollowObj(followerProfile.id, followingProfile.id);
     if (!follow) return false;
-    
+
     // Delete follow relationship
     await follow.destroy();
-    
+
     // Update counts
-    followerProfile.increment('followingCount', -1);
-    followingProfile.increment('followersCount', -1);
-    
-    await Parse.Object.saveAll([followerProfile, followingProfile]);
-    
+    // Always fetch fresh profile objects for mutation
+    const followerProfileObject = await getProfileObjectById(followerProfile.id);
+    const followingProfileObject = await getProfileObjectById(followingProfile.id);
+    followerProfileObject.increment('followingCount', -1);
+    followingProfileObject.increment('followersCount', -1);
+
+    await Parse.Object.saveAll([followerProfileObject, followingProfileObject]);
+
     return true;
   } catch (error) {
     console.error('Error unfollowing profile:', error);

@@ -146,3 +146,8 @@ export const fetchProfiles = async (limit = 20, skip = 0) => {
     return [];
   }
 };
+
+export const getProfileObjectById = async (profileId) => {
+  const Profile = Parse.Object.extend("Profile");
+  return new Parse.Query(Profile).get(profileId);
+};
