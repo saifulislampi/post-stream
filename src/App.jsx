@@ -70,7 +70,13 @@ export default function App() {
         }, 
         currentProfile
       );
-      setPosts([saved, ...(posts ?? [])]);
+
+      const postWithAuthor = {
+        ...saved,
+        author: currentProfile,  // what Timeline/PostItem expects
+      };
+
+      setPosts([postWithAuthor, ...(posts ?? [])]);
     } catch (error) {
       console.error('Error creating post:', error);
     }
