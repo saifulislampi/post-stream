@@ -17,7 +17,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 
 import { fetchPostsWithAuthor, createPost } from "./services/posts";
-import { getCurrentUser, logout } from "./components/auth/AuthService";
+import { getCurrentUser, logout, login } from "./components/auth/AuthService";
 import { fetchProfileByUserId } from "./services/profiles";
 
 export default function App() {
@@ -31,33 +31,45 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in and fetch posts
-    const initializeApp = async () => {
+    // Only fetch profile and posts when currentUser changes and is not null
+    const fetchProfileAndPosts = async () => {
+      setLoading(true);
       try {
-        const user = getCurrentUser();
-        setCurrentUser(user);
-
-        console.log("Current user:", user);
-
-        if (user) {
-          const profile = await fetchProfileByUserId(user.id);
+        if (currentUser) {
+          const profile = await fetchProfileByUserId(currentUser.id);
           setCurrentProfile(profile);
 
-          // Only fetch posts after profile is set
           const postsData = await fetchPostsWithAuthor();
           setPosts(postsData);
-        } else {
-          setCurrentProfile(null);
-          setPosts(null);
         }
       } catch (error) {
-        console.error("Error initializing app:", error);
+        console.error("Error fetching profile and posts:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    initializeApp();
+    // On initial mount, check if user is already logged in
+    const checkLoggedInUser = async () => {
+      setLoading(true);
+      try {
+        const user = getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
+          // Don't fetch profile/posts here - that will happen in the fetchProfileAndPosts effect
+        }
+      } catch (error) {
+        console.error("Error checking logged in user:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentUser) {
+      fetchProfileAndPosts();
+    } else {
+      checkLoggedInUser();
+    }
   }, [currentUser]);
 
   // Handler to add a new post (called from PostForm)
@@ -97,6 +109,22 @@ export default function App() {
     }
   };
 
+  const handleLogin = async (username, password) => {
+    try {
+      // Login with Parse and get profile
+      const { user, profile } = await login(username, password);
+
+      // Update App state
+      setCurrentUser(user);
+      setCurrentProfile(profile);
+
+      navigate("/");
+    } catch (error) {
+      console.error("Error logging in:", error);
+      throw error; // Re-throw so login form can display error
+    }
+  };
+
   // Show loading spinner while initializing
   if (loading) return <Spinner />;
 
@@ -104,22 +132,31 @@ export default function App() {
     <div className="app">
       <Routes>
         {/* Public Auth Routes - redirect to home if already logged in */}
-        <Route path="/auth" element={
-          <PublicRoute>
-            <AuthModule />
-          </PublicRoute>
-        } />
-        <Route path="/login" element={
-          <PublicRoute>
-            <AuthLogin />
-          </PublicRoute>
-        } />
-        <Route path="/register" element={
-          <PublicRoute>
-            <AuthRegister />
-          </PublicRoute>
-        } />
-        
+        <Route
+          path="/auth"
+          element={
+            <PublicRoute>
+              <AuthModule />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <AuthLogin onLogin={handleLogin} />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <AuthRegister />
+            </PublicRoute>
+          }
+        />
+
         {/* Protected App Routes */}
         <Route
           path="/"

@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { login } from "./AuthService";
+import { Link} from "react-router-dom";
 
-const AuthLogin = () => {
+const AuthLogin = ({ onLogin }) => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,8 +16,7 @@ const AuthLogin = () => {
     setLoading(true);
     
     try {
-      await login(form.username, form.password);
-      navigate("/");
+      await onLogin(form.username, form.password);
     } catch (err) {
       setError(err.message);
     } finally {
