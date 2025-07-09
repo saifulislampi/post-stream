@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { getCurrentUser } from "./AuthService";
 
 // ProtectedRoute - Requires authentication
@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
-  return children;
+  return children || <Outlet />;
 };
 
 export default ProtectedRoute;

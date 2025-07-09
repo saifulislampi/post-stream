@@ -1,32 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom"; // Remove BrowserRouter import
-
-import Header from "./components/layout/Header";
-import RightSidebar from "./components/layout/RightSidebar";
+import { useNavigate } from "react-router-dom";
 import Spinner from "./components/shared/Spinner";
-
-import Timeline from "./pages/Timeline";
-import PostPage from "./pages/PostPage";
-import ProfilePage from "./pages/ProfilePage";
-import ExplorePage from "./pages/ExplorePage";
-
-import AuthModule from "./components/auth/AuthModule";
-import AuthLogin from "./components/auth/AuthLogin";
-import AuthRegister from "./components/auth/AuthRegister";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import UnauthenticatedRoute from "./components/auth/UnauthenticatedRoute";
-
+import AppRoutes from "./routes/AppRoutes";
 import { fetchPostsWithAuthor, createPost } from "./services/posts";
 import { getCurrentUser, logout, login } from "./components/auth/AuthService";
 import { fetchProfileByUserId } from "./services/profiles";
 
 export default function App() {
   const navigate = useNavigate();
-  // State for all posts loaded from backend
   const [posts, setPosts] = useState(null);
-  // State for the currently logged-in user via Parse
   const [currentUser, setCurrentUser] = useState(null);
-  // Add state for current profile
   const [currentProfile, setCurrentProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -72,22 +55,19 @@ export default function App() {
     }
   }, [currentUser]);
 
-  // Handler to add a new post (called from PostForm)
-  const handleAdd = async (raw) => {
+  // Handler to add a new post
+  const handleAddPost = async (raw) => {
     if (!currentProfile) return;
 
     try {
       const saved = await createPost(
-        {
-          ...raw,
-          tag: raw.tag || "general",
-        },
+        { ...raw, tag: raw.tag || "general" },
         currentProfile
       );
 
       const postWithAuthor = {
         ...saved,
-        author: currentProfile, // what Timeline/PostItem expects
+        author: currentProfile,
       };
 
       setPosts([postWithAuthor, ...(posts ?? [])]);
@@ -96,185 +76,44 @@ export default function App() {
     }
   };
 
+  // Handler for logout
   const handleLogout = async () => {
     try {
       await logout();
       setCurrentUser(null);
       setCurrentProfile(null);
       setPosts(null);
-
       navigate("/auth");
     } catch (error) {
       console.error("Error logging out:", error);
     }
   };
 
+  // Handler for login
   const handleLogin = async (username, password) => {
     try {
-      // Login with Parse and get profile
       const { user, profile } = await login(username, password);
-
-      // Update App state
       setCurrentUser(user);
       setCurrentProfile(profile);
-
       navigate("/");
     } catch (error) {
       console.error("Error logging in:", error);
-      throw error; // Re-throw so login form can display error
+      throw error;
     }
   };
 
-  // Show loading spinner while initializing
   if (loading) return <Spinner />;
 
   return (
     <div className="app">
-      <Routes>
-        {/* Public Auth Routes - redirect to home if already logged in */}
-        <Route
-          path="/auth"
-          element={
-            <UnauthenticatedRoute>
-              <AuthModule />
-            </UnauthenticatedRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <UnauthenticatedRoute>
-              <AuthLogin onLogin={handleLogin} />
-            </UnauthenticatedRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <UnauthenticatedRoute>
-              <AuthRegister />
-            </UnauthenticatedRoute>
-          }
-        />
-
-        {/* Protected App Routes */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <>
-                {/* Pass both user and profile */}
-                <Header
-                  currentUser={currentUser}
-                  currentProfile={currentProfile}
-                  onLogout={handleLogout}
-                />
-
-                <div className="container-fluid p-0">
-                  <div className="row g-0 justify-content-center">
-                    <main className="col-12 col-lg-6 col-xl-5 main-content">
-                      <Timeline
-                        posts={posts}
-                        onAdd={handleAdd}
-                        currentUser={currentUser}
-                        currentProfile={currentProfile}
-                      />
-                    </main>
-                    <RightSidebar />
-                  </div>
-                </div>
-              </>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/post/:id"
-          element={
-            <ProtectedRoute>
-              <>
-                <Header
-                  currentUser={currentUser}
-                  currentProfile={currentProfile}
-                  onLogout={handleLogout}
-                />
-                <div className="container-fluid p-0">
-                  <div className="row g-0 justify-content-center">
-                    <main className="col-12 col-lg-6 col-xl-5 main-content">
-                      <PostPage currentProfile={currentProfile} />
-                    </main>
-                    <RightSidebar />
-                  </div>
-                </div>
-              </>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Change from /user/:userId to /profile/:profileId */}
-        <Route
-          path="/profile/:profileId"
-          element={
-            <ProtectedRoute>
-              <>
-                <Header
-                  currentUser={currentUser}
-                  currentProfile={currentProfile}
-                  onLogout={handleLogout}
-                />
-                <div className="container-fluid p-0">
-                  <div className="row g-0 justify-content-center">
-                    <main className="col-12 col-lg-6 col-xl-5 main-content">
-                      <ProfilePage currentProfile={currentProfile} />
-                    </main>
-                    <RightSidebar />
-                  </div>
-                </div>
-              </>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Add redirect from old path to new path for backward compatibility */}
-        <Route
-          path="/user/:userId"
-          element={
-            <Navigate
-              to={(location) => {
-                const userId = location.pathname.split("/").pop();
-                return `/profile/${userId}`;
-              }}
-              replace
-            />
-          }
-        />
-
-        <Route
-          path="/explore"
-          element={
-            <ProtectedRoute>
-              <>
-                <Header
-                  currentUser={currentUser}
-                  currentProfile={currentProfile}
-                  onLogout={handleLogout}
-                />
-                <div className="container-fluid p-0">
-                  <div className="row g-0 justify-content-center">
-                    <main className="col-12 col-lg-6 col-xl-5 main-content">
-                      <ExplorePage currentProfile={currentProfile} />
-                    </main>
-                    <RightSidebar />
-                  </div>
-                </div>
-              </>
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Default redirect */}
-        <Route path="*" element={<Navigate to="/auth" replace />} />
-      </Routes>
+      <AppRoutes
+        currentUser={currentUser}
+        currentProfile={currentProfile}
+        onLogout={handleLogout}
+        onLogin={handleLogin}
+        onAddPost={handleAddPost}
+        posts={posts}
+      />
     </div>
   );
 }

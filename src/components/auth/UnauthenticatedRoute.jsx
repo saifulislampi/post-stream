@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { getCurrentUser } from "./AuthService";
 
 // UnauthenticatedRoute - Allows access to auth pages only if user is not logged in
@@ -10,7 +10,7 @@ const UnauthenticatedRoute = ({ children }) => {
     return <Navigate to="/" replace />;
   }
   // If user is not logged in, allow access to auth pages
-  return children;
+  return children || <Outlet />;
 };
 
 export default UnauthenticatedRoute;
