@@ -14,6 +14,7 @@ import AuthModule from "./components/auth/AuthModule";
 import AuthLogin from "./components/auth/AuthLogin";
 import AuthRegister from "./components/auth/AuthRegister";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicRoute from "./components/auth/PublicRoute";
 
 import { fetchPostsWithAuthor, createPost } from "./services/posts";
 import { getCurrentUser } from "./components/auth/AuthService";
@@ -88,10 +89,22 @@ export default function App() {
   return (
     <div className="app">
       <Routes>
-        {/* Public Auth Routes */}
-        <Route path="/auth" element={<AuthModule />} />
-        <Route path="/login" element={<AuthLogin />} />
-        <Route path="/register" element={<AuthRegister />} />
+        {/* Public Auth Routes - redirect to home if already logged in */}
+        <Route path="/auth" element={
+          <PublicRoute>
+            <AuthModule />
+          </PublicRoute>
+        } />
+        <Route path="/login" element={
+          <PublicRoute>
+            <AuthLogin />
+          </PublicRoute>
+        } />
+        <Route path="/register" element={
+          <PublicRoute>
+            <AuthRegister />
+          </PublicRoute>
+        } />
         
         {/* Protected App Routes */}
         <Route path="/" element={
