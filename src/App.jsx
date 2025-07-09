@@ -14,7 +14,7 @@ import AuthModule from "./components/auth/AuthModule";
 import AuthLogin from "./components/auth/AuthLogin";
 import AuthRegister from "./components/auth/AuthRegister";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import PublicRoute from "./components/auth/PublicRoute";
+import UnauthenticatedRoute from "./components/auth/UnauthenticatedRoute";
 
 import { fetchPostsWithAuthor, createPost } from "./services/posts";
 import { getCurrentUser, logout, login } from "./components/auth/AuthService";
@@ -135,25 +135,25 @@ export default function App() {
         <Route
           path="/auth"
           element={
-            <PublicRoute>
+            <UnauthenticatedRoute>
               <AuthModule />
-            </PublicRoute>
+            </UnauthenticatedRoute>
           }
         />
         <Route
           path="/login"
           element={
-            <PublicRoute>
+            <UnauthenticatedRoute>
               <AuthLogin onLogin={handleLogin} />
-            </PublicRoute>
+            </UnauthenticatedRoute>
           }
         />
         <Route
           path="/register"
           element={
-            <PublicRoute>
+            <UnauthenticatedRoute>
               <AuthRegister />
-            </PublicRoute>
+            </UnauthenticatedRoute>
           }
         />
 

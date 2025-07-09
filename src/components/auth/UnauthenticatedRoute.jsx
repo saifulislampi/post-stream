@@ -2,7 +2,8 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import { getCurrentUser } from "./AuthService";
 
-const PublicRoute = ({ children }) => {
+// UnauthenticatedRoute - Allows access to auth pages only if user is not logged in
+const UnauthenticatedRoute = ({ children }) => {
   const user = getCurrentUser();
   if (user) {
     // If user is already logged in, redirect to home page
@@ -12,4 +13,4 @@ const PublicRoute = ({ children }) => {
   return children;
 };
 
-export default PublicRoute;
+export default UnauthenticatedRoute;
