@@ -126,3 +126,19 @@ export const updateProfile = async (updates) => {
 
   return await profile.save();
 };
+
+/**
+ * Checks if a user is currently authenticated
+ * 
+ * Note: We don't use Parse.User.current()?.authenticated because:
+ * 1. It can be inconsistent and may not reflect the true auth state
+ * 2. It might remain true even after a session has expired
+ * 3. The presence of a valid session token is the true indicator of authentication
+ * 4. This approach is more reliable across different Parse SDK versions
+ * 
+ * @returns {boolean} True if user is logged in with valid session, false otherwise
+ */
+export const isAuthenticated = () => {
+  const user = Parse.User.current();
+  return !!(user && user.getSessionToken());
+};

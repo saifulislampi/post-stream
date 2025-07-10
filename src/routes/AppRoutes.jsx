@@ -2,8 +2,8 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AuthLayout from "../components/layout/AuthLayout";
 import MainLayout from "../components/layout/MainLayout";
-import ProtectedRoute from "../components/auth/ProtectedRoute";
-import UnauthenticatedRoute from "../components/auth/UnauthenticatedRoute";
+import ProtectedRoute from "./ProtectedRoute";
+import UnauthenticatedRoute from "./UnauthenticatedRoute";
 import { publicRoutes, protectedRoutes, specialRoutes } from "./routeConfig";
 
 const AppRoutes = ({
