@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.3.0] - 2025-07-10
+
+### Added
+- Authentication system with register, login, and logout functionality
+- Parse Auth Service for handling user authentication and session management
+- ProtectedRoute component to secure routes requiring authentication
+- UnauthenticatedRoute component to prevent authenticated users from accessing login/signup pages
+- Comprehensive Authentication Module with the following features:
+  - Protected routes that cannot be accessed without authentication
+  - Automatic redirection to login when accessing protected content
+  - Prevention of authenticated users accessing authentication pages
+  - URL protection for users manually typing protected route paths
+- New Profile class that separates user identity from profile data
+- Automatic profile creation during user registration
+
+### Changed
+- Restructured App.jsx, extracting routing logic to dedicated components
+- Implemented route configuration using routeConfig.jsx for cleaner route definitions
+- Redesigned database schema to separate authentication (User) from profile data (Profile)
+- Updated data relationships - posts and comments now reference author profiles instead of users
+- Implemented layout templates (AuthLayout and MainLayout) using React Router's Outlet component
+- Refactored header components to properly display current user information
+- Improved login flow with proper error handling and feedback
+
+### Fixed
+- Post author display issues when creating posts with different users
+- Route protection bypass vulnerabilities
+- Follow/unfollow functionality
+- Unnecessary container nesting
+
 ## [0.2.0] - 2025-07-01
 
 ### Added
