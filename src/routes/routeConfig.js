@@ -18,7 +18,7 @@ export const publicRoutes = [
   {
     path: "/register",
     component: AuthRegister,
-  }
+  },
 ];
 
 export const protectedRoutes = [
@@ -37,7 +37,7 @@ export const protectedRoutes = [
   {
     path: "/explore",
     component: ExplorePage,
-  }
+  },
 ];
 
 // For special routes like redirects
@@ -47,6 +47,6 @@ export const specialRoutes = [
     redirect: (location) => {
       const userId = location.pathname.split("/").pop();
       return `/profile/${userId}`;
-    }
-  }
+    },
+  },
 ];

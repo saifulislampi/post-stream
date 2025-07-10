@@ -2,8 +2,8 @@
  * Comments service - using Back4App with Parse SDK
  */
 
-import Parse from 'parse';
-import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from '../environments.js';
+import Parse from "parse";
+import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from "../environments.js";
 
 // Initialize Parse
 if (!Parse.applicationId) {
@@ -15,12 +15,12 @@ if (!Parse.applicationId) {
 const parseCommentToPlain = (parseComment) => {
   return {
     id: parseComment.id,
-    postId: parseComment.get('postId'),
-    authorId: parseComment.get('authorId'),
-    authorUsername: parseComment.get('authorUsername'),
-    body: parseComment.get('body'),
-    createdAt: parseComment.get('createdAt'),
-    updatedAt: parseComment.get('updatedAt')
+    postId: parseComment.get("postId"),
+    authorId: parseComment.get("authorId"),
+    authorUsername: parseComment.get("authorUsername"),
+    body: parseComment.get("body"),
+    createdAt: parseComment.get("createdAt"),
+    updatedAt: parseComment.get("updatedAt"),
   };
 };
 
@@ -29,13 +29,13 @@ const parseCommentToPlain = (parseComment) => {
  */
 export const fetchCommentsByPost = async (postId, limit = 50, skip = 0) => {
   try {
-    const Comment = Parse.Object.extend('Comment');
+    const Comment = Parse.Object.extend("Comment");
     const query = new Parse.Query(Comment);
-    query.equalTo('postId', postId);
+    query.equalTo("postId", postId);
     query.limit(limit);
     query.skip(skip);
-    query.ascending('createdAt'); // Show oldest first for comments
-    
+    query.ascending("createdAt"); // Show oldest first for comments
+
     const comments = await query.find();
     return comments.map(parseCommentToPlain);
   } catch (error) {
@@ -49,23 +49,23 @@ export const fetchCommentsByPost = async (postId, limit = 50, skip = 0) => {
  */
 export const createComment = async (commentData, profile, post) => {
   try {
-    const Comment = Parse.Object.extend('Comment');
+    const Comment = Parse.Object.extend("Comment");
     const comment = new Comment();
-    
-    comment.set('postId', post.id);
-    comment.set('authorId', profile.id);
-    comment.set('authorUsername', profile.get('username'));
-    comment.set('body', commentData.body);
-    
+
+    comment.set("postId", post.id);
+    comment.set("authorId", profile.id);
+    comment.set("authorUsername", profile.get("username"));
+    comment.set("body", commentData.body);
+
     const savedComment = await comment.save();
-    
+
     // Increment post's comment count
-    post.increment('commentsCount');
+    post.increment("commentsCount");
     await post.save();
-    
+
     return parseCommentToPlain(savedComment);
   } catch (error) {
-    console.error('Error creating comment:', error);
+    console.error("Error creating comment:", error);
     throw error;
   }
 };
@@ -76,26 +76,31 @@ export const createComment = async (commentData, profile, post) => {
 export const fetchCommentsWithAuthor = async (postId, limit = 50, skip = 0) => {
   try {
     const comments = await fetchCommentsByPost(postId, limit, skip);
-    
+
     // Get unique author IDs
-    const authorIds = [...new Set(comments.map(comment => comment.authorId))];
-    
+    const authorIds = [...new Set(comments.map((comment) => comment.authorId))];
+
     // Import profile service to avoid circular dependencies
-    const { fetchProfilesByIds } = await import('./profiles.js');
-    
+    const { fetchProfilesByIds } = await import("./profiles.js");
+
     // Fetch author profiles
     const profiles = await fetchProfilesByIds(authorIds);
-    
+
     // Create a lookup map for O(1) access
-    const profileMap = new Map(profiles.map(profile => [profile.id, profile]));
-    
+    const profileMap = new Map(
+      profiles.map((profile) => [profile.id, profile])
+    );
+
     // Attach author data to comments
-    return comments.map(comment => ({
+    return comments.map((comment) => ({
       ...comment,
-      author: profileMap.get(comment.authorId) || null
+      author: profileMap.get(comment.authorId) || null,
     }));
   } catch (error) {
-    console.error(`Error fetching comments with author for post ${postId}:`, error);
+    console.error(
+      `Error fetching comments with author for post ${postId}:`,
+      error
+    );
     return [];
   }
 };

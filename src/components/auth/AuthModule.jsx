@@ -12,13 +12,13 @@ const AuthModule = () => {
         <p className="lead text-muted mb-4">
           Join the conversation. Share your thoughts with the world.
         </p>
-        
+
         {registered && (
           <div className="alert alert-success" role="alert">
             Registration successful! Please log in to continue.
           </div>
         )}
-        
+
         <div className="d-grid gap-3 col-8 mx-auto">
           <Link to="/login" className="btn btn-primary btn-lg">
             Sign In
@@ -27,7 +27,7 @@ const AuthModule = () => {
             Create Account
           </Link>
         </div>
-        
+
         <p className="text-muted mt-4 small">
           Connect with friends and discover what's happening around the world.
         </p>

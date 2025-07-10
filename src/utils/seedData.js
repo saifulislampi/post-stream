@@ -125,7 +125,10 @@ async function seedUsers() {
 
       console.log(`✓ Created user and profile: @${userData.username}`);
     } catch (error) {
-      console.error(`✗ Error creating user ${userData.username}:`, error.message);
+      console.error(
+        `✗ Error creating user ${userData.username}:`,
+        error.message
+      );
     }
   }
 
@@ -157,7 +160,9 @@ async function seedPosts(profiles) {
       await profile.save(null, { useMasterKey: true });
 
       console.log(
-        `✓ Created post by @${profile.get("username")}: "${postData.body.substring(0, 40)}..."`
+        `✓ Created post by @${profile.get(
+          "username"
+        )}: "${postData.body.substring(0, 40)}..."`
       );
     } catch (error) {
       console.error(`✗ Error creating post:`, error.message);
@@ -189,10 +194,14 @@ async function seedFollows(profiles) {
       followerProfile.increment("followingCount");
       followingProfile.increment("followersCount");
 
-      await Parse.Object.saveAll([followerProfile, followingProfile], { useMasterKey: true });
+      await Parse.Object.saveAll([followerProfile, followingProfile], {
+        useMasterKey: true,
+      });
 
       console.log(
-        `✓ @${followerProfile.get("username")} now follows @${followingProfile.get("username")}`
+        `✓ @${followerProfile.get(
+          "username"
+        )} now follows @${followingProfile.get("username")}`
       );
     } catch (error) {
       console.error("✗ Error creating follow relationship:", error.message);
@@ -221,7 +230,9 @@ async function seedComments(posts, profiles) {
       post.increment("commentsCount");
       await post.save(null, { useMasterKey: true });
 
-      console.log(`✓ @${profile.get("username")} commented: "${commentData.body}"`);
+      console.log(
+        `✓ @${profile.get("username")} commented: "${commentData.body}"`
+      );
     } catch (error) {
       console.error(`✗ Error creating comment:`, error.message);
     }

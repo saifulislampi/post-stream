@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 
-export default function SearchInput({ onSearch, placeholder = "Search posts..." }) {
+export default function SearchInput({
+  onSearch,
+  placeholder = "Search posts...",
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const inputRef = useRef(null);
 

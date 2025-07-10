@@ -3,16 +3,16 @@ import React from "react";
 const trendingData = [
   {
     title: "#React",
-    count: "2,845 posts"
+    count: "2,845 posts",
   },
   {
     title: "#JavaScript",
-    count: "1,234 posts"
+    count: "1,234 posts",
   },
   {
     title: "#ModernWebDev",
-    count: "892 posts"
-  }
+    count: "892 posts",
+  },
 ];
 
 export default function TrendingWidget() {

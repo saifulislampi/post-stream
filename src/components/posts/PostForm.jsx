@@ -20,9 +20,11 @@ export default function PostForm({ onAdd, currentUser }) {
   // Fix: Handle Parse User object and potential undefined values
   const getUserInitial = () => {
     if (!currentUser) return "?";
-    
+
     // For Parse User, access firstName using .get() method
-    const firstName = currentUser.get ? currentUser.get("firstName") : currentUser.firstName;
+    const firstName = currentUser.get
+      ? currentUser.get("firstName")
+      : currentUser.firstName;
     return firstName ? firstName[0].toUpperCase() : "?";
   };
 

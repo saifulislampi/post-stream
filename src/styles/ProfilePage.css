@@ -146,7 +146,7 @@
 }
 
 .tab-item.active::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -171,27 +171,27 @@
   .profile-banner {
     height: 150px;
   }
-  
+
   .profile-avatar-large {
     width: 100px;
     height: 100px;
     font-size: 2.5rem;
     margin-top: -50px;
   }
-  
+
   .profile-details {
     padding: 0.75rem;
   }
-  
+
   .profile-stats {
     gap: 1rem;
   }
-  
+
   .tab-item {
     padding: 0.75rem 0.5rem;
     font-size: 0.9rem;
   }
-  
+
   .profile-tabs {
     top: 56px; /* Adjust for mobile header height */
   }

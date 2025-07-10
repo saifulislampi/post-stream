@@ -2,18 +2,24 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchPostsWithAuthor } from "../services/posts";
 import { fetchProfileById, fetchProfileByUserId } from "../services/profiles";
-import { isFollowing, followProfile, unfollowProfile } from "../services/follows";
+import {
+  isFollowing,
+  followProfile,
+  unfollowProfile,
+} from "../services/follows";
 import { getCurrentUser } from "../components/auth/AuthService";
 import Spinner from "../components/shared/Spinner";
 import PostList from "../components/posts/PostList";
 
-import "../styles/ProfilePage.css"; 
+import "../styles/ProfilePage.css";
 
 // Helper function to get user initials for avatar
 function getInitials(profile) {
   if (!profile) return "?";
   if (profile.firstName && profile.lastName)
-    return profile.firstName[0].toUpperCase() + profile.lastName[0].toUpperCase();
+    return (
+      profile.firstName[0].toUpperCase() + profile.lastName[0].toUpperCase()
+    );
   if (profile.firstName) return profile.firstName[0].toUpperCase();
   if (profile.lastName) return profile.lastName[0].toUpperCase();
   return "?";
@@ -22,7 +28,7 @@ function getInitials(profile) {
 export default function ProfilePage() {
   const { profileId } = useParams(); // Changed from userId to profileId
   const navigate = useNavigate();
-  
+
   const [profile, setProfile] = useState(null);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [posts, setPosts] = useState(null);
@@ -44,7 +50,7 @@ export default function ProfilePage() {
         console.error("Error loading current profile:", error);
       }
     };
-    
+
     loadCurrentProfile();
   }, []);
 
@@ -52,23 +58,23 @@ export default function ProfilePage() {
   useEffect(() => {
     document.title = "Profile - Post Stream";
     setLoading(true);
-    
+
     const loadProfileAndPosts = async () => {
       try {
         let profileData = null;
-        
+
         // First try to fetch by Profile ID
         try {
           profileData = await fetchProfileById(profileId);
         } catch (error) {
           console.log("Not a Profile ID, trying as User ID...");
         }
-        
+
         // If that fails, try to fetch by User ID
         if (!profileData) {
           try {
             profileData = await fetchProfileByUserId(profileId);
-            
+
             // If successful, redirect to the correct profile URL
             if (profileData && profileData.id !== profileId) {
               navigate(`/profile/${profileData.id}`, { replace: true });
@@ -78,22 +84,25 @@ export default function ProfilePage() {
             console.error("Error fetching profile by User ID:", error);
           }
         }
-        
+
         if (!profileData) {
           console.error("Profile not found for ID:", profileId);
           setLoading(false);
           return;
         }
-        
+
         setProfile(profileData);
-        
+
         // Get posts by this profile
         const allPosts = await fetchPostsWithAuthor();
-        setPosts(allPosts.filter(p => p.authorId === profileData.id));
-        
+        setPosts(allPosts.filter((p) => p.authorId === profileData.id));
+
         // Check if current user is following this profile
         if (currentProfile && currentProfile.id !== profileData.id) {
-          const following = await isFollowing(currentProfile.id, profileData.id);
+          const following = await isFollowing(
+            currentProfile.id,
+            profileData.id
+          );
           setIsFollowingUser(following);
         }
       } catch (error) {
@@ -102,7 +111,7 @@ export default function ProfilePage() {
         setLoading(false);
       }
     };
-    
+
     if (profileId) {
       loadProfileAndPosts();
     }
@@ -111,7 +120,7 @@ export default function ProfilePage() {
   const handleFollowToggle = async () => {
     if (!currentProfile) return;
     setFollowLoading(true);
-    
+
     try {
       if (isFollowingUser) {
         await unfollowProfile(currentProfile, profile);
@@ -137,7 +146,8 @@ export default function ProfilePage() {
   };
 
   if (loading) return <Spinner />;
-  if (!profile) return <div className="alert alert-warning p-3">Profile not found</div>;
+  if (!profile)
+    return <div className="alert alert-warning p-3">Profile not found</div>;
 
   const isOwnProfile = currentProfile?.id === profile.id;
 
@@ -166,7 +176,11 @@ export default function ProfilePage() {
       <div className="profile-info">
         <div className="profile-banner">
           {profile.coverImage && (
-            <img src={profile.coverImage} alt="cover" className="w-100 h-100 object-cover" />
+            <img
+              src={profile.coverImage}
+              alt="cover"
+              className="w-100 h-100 object-cover"
+            />
           )}
         </div>
 
@@ -190,15 +204,19 @@ export default function ProfilePage() {
                 onMouseLeave={() => setIsHoveringFollow(false)}
                 onClick={handleFollowToggle}
                 disabled={followLoading}
-                className={`profile-follow-btn ${isFollowingUser ? "following" : ""}`}
+                className={`profile-follow-btn ${
+                  isFollowingUser ? "following" : ""
+                }`}
               >
                 {followLoading
-                  ? (isFollowingUser ? "Unfollowing..." : "Following...")
+                  ? isFollowingUser
+                    ? "Unfollowing..."
+                    : "Following..."
                   : isFollowingUser
-                    ? isHoveringFollow
-                      ? "Unfollow"
-                      : "Following"
-                    : "Follow"}
+                  ? isHoveringFollow
+                    ? "Unfollow"
+                    : "Following"
+                  : "Follow"}
               </button>
             )}
           </div>
@@ -207,23 +225,23 @@ export default function ProfilePage() {
             <h2 className="profile-name">
               {profile.firstName} {profile.lastName}
             </h2>
-            <div className="profile-handle">
-              @{profile.username}
-            </div>
+            <div className="profile-handle">@{profile.username}</div>
 
             {profile.bio && (
-              <div className="profile-bio mb-2">
-                {profile.bio}
-              </div>
+              <div className="profile-bio mb-2">{profile.bio}</div>
             )}
 
             <div className="profile-stats">
               <div className="stat-item">
-                <span className="stat-number">{profile.followingCount || 0}</span>
+                <span className="stat-number">
+                  {profile.followingCount || 0}
+                </span>
                 <span className="stat-label">Following</span>
               </div>
               <div className="stat-item">
-                <span className="stat-number">{profile.followersCount || 0}</span>
+                <span className="stat-number">
+                  {profile.followersCount || 0}
+                </span>
                 <span className="stat-label">Followers</span>
               </div>
             </div>

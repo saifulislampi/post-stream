@@ -25,13 +25,13 @@ export default function ExplorePage() {
         setLoading(false);
       }
     };
-    
+
     loadPosts();
   }, []);
 
   const handleSearch = async (term) => {
     setSearchTerm(term);
-    
+
     if (!term.trim()) {
       // If search is empty, show all posts
       setPosts(allPosts);
@@ -40,7 +40,7 @@ export default function ExplorePage() {
     }
 
     setSearching(true);
-    
+
     // Filter posts based on search term
     const filtered = allPosts.filter((post) => {
       const lowerTerm = term.toLowerCase().trim();
@@ -53,7 +53,7 @@ export default function ExplorePage() {
             .includes(lowerTerm))
       );
     });
-    
+
     setPosts(filtered);
     setSearching(false);
   };
@@ -69,7 +69,7 @@ export default function ExplorePage() {
           placeholder="Search posts, users, or hashtags..."
         />
       </div>
-      
+
       {searching ? (
         <Spinner />
       ) : (
@@ -77,10 +77,11 @@ export default function ExplorePage() {
           {searchTerm && (
             <div className="search-results-header mb-3">
               <p className="text-muted">
-                {posts.length > 0 
-                  ? `Found ${posts.length} result${posts.length !== 1 ? 's' : ''} for "${searchTerm}"`
-                  : `No results found for "${searchTerm}"`
-                }
+                {posts.length > 0
+                  ? `Found ${posts.length} result${
+                      posts.length !== 1 ? "s" : ""
+                    } for "${searchTerm}"`
+                  : `No results found for "${searchTerm}"`}
               </p>
             </div>
           )}

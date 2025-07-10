@@ -10,10 +10,13 @@ function formatTimestamp(date) {
   if (diff < 60) return `${diff}s`;
   if (diff < 3600) return `${Math.floor(diff / 60)}m`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-  return new Date(date).toLocaleDateString(undefined, { 
-    month: "short", 
+  return new Date(date).toLocaleDateString(undefined, {
+    month: "short",
     day: "numeric",
-    year: new Date(date).getFullYear() !== now.getFullYear() ? "numeric" : undefined
+    year:
+      new Date(date).getFullYear() !== now.getFullYear()
+        ? "numeric"
+        : undefined,
   });
 }
 
@@ -63,11 +66,11 @@ export default function PostDetail() {
         userId: "current-user-id",
         user: {
           firstName: "Current",
-          lastName: "User"
+          lastName: "User",
         },
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       };
-      
+
       setReplies([newReply, ...replies]);
       setReplyText("");
     } catch (err) {
@@ -79,20 +82,22 @@ export default function PostDetail() {
 
   if (loading) return <Spinner />;
   if (error) return <div className="alert alert-danger p-4">{error}</div>;
-  if (!post) return <div className="alert alert-warning p-4">Post not found</div>;
+  if (!post)
+    return <div className="alert alert-warning p-4">Post not found</div>;
 
   const postAuthor = post.author || {};
-  const fullName = postAuthor.firstName && postAuthor.lastName 
-    ? `${postAuthor.firstName} ${postAuthor.lastName}` 
-    : postAuthor.firstName || postAuthor.lastName || "Unknown User";
+  const fullName =
+    postAuthor.firstName && postAuthor.lastName
+      ? `${postAuthor.firstName} ${postAuthor.lastName}`
+      : postAuthor.firstName || postAuthor.lastName || "Unknown User";
 
   return (
     <div className="post-detail">
       {/* Header */}
       <div className="post-detail-header">
         <div className="d-flex align-items-center">
-          <button 
-            className="btn btn-link p-2 me-3" 
+          <button
+            className="btn btn-link p-2 me-3"
             onClick={() => navigate(-1)}
             style={{ color: "var(--text-primary)" }}
           >
@@ -107,7 +112,10 @@ export default function PostDetail() {
       {/* Post Content */}
       <div className="post-detail-content">
         <div className="post-detail-main">
-          <div className="user-avatar me-3" style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}>
+          <div
+            className="user-avatar me-3"
+            style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}
+          >
             {postAuthor.firstName?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="flex-grow-1">
@@ -119,13 +127,12 @@ export default function PostDetail() {
             </div>
           </div>
         </div>
-        
-        <div className="post-detail-body">
-          {post.body}
-        </div>
-        
+
+        <div className="post-detail-body">{post.body}</div>
+
         <div className="post-detail-meta">
-          {formatTimestamp(post.createdAt)} • <span className="text-primary">#{post.tag || "general"}</span>
+          {formatTimestamp(post.createdAt)} •{" "}
+          <span className="text-primary">#{post.tag || "general"}</span>
         </div>
       </div>
 
@@ -151,7 +158,10 @@ export default function PostDetail() {
       {/* Reply Section */}
       <div className="reply-section">
         <form onSubmit={handleReply} className="reply-form">
-          <div className="user-avatar me-3" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
+          <div
+            className="user-avatar me-3"
+            style={{ width: "40px", height: "40px", fontSize: "1rem" }}
+          >
             U
           </div>
           <div className="flex-grow-1">
@@ -164,8 +174,8 @@ export default function PostDetail() {
               disabled={replyLoading}
             />
             <div className="d-flex justify-content-end mt-2">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="reply-btn"
                 disabled={!replyText.trim() || replyLoading}
               >
@@ -180,20 +190,27 @@ export default function PostDetail() {
       <div className="replies-list">
         {replies.map((reply) => (
           <div key={reply.id} className="reply-item">
-            <div className="user-avatar me-3" style={{ width: "40px", height: "40px", fontSize: "1rem" }}>
+            <div
+              className="user-avatar me-3"
+              style={{ width: "40px", height: "40px", fontSize: "1rem" }}
+            >
               {reply.user?.firstName?.[0]?.toUpperCase() || "?"}
             </div>
             <div className="reply-content">
               <div className="reply-author">
                 <span className="fw-bold me-2">
-                  {reply.user?.firstName && reply.user?.lastName 
-                    ? `${reply.user.firstName} ${reply.user.lastName}` 
+                  {reply.user?.firstName && reply.user?.lastName
+                    ? `${reply.user.firstName} ${reply.user.lastName}`
                     : "Unknown User"}
                 </span>
                 {reply.user?.username && (
-                  <span className="text-muted me-2">@{reply.user.username}</span>
+                  <span className="text-muted me-2">
+                    @{reply.user.username}
+                  </span>
                 )}
-                <span className="text-muted">• {formatTimestamp(reply.createdAt)}</span>
+                <span className="text-muted">
+                  • {formatTimestamp(reply.createdAt)}
+                </span>
               </div>
               <div className="reply-body">{reply.body}</div>
             </div>
