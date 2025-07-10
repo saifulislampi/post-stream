@@ -38,6 +38,7 @@ This project was developed as a class project for [CSE 40693 - Modern Web Develo
    - Create a new app and get your Application ID, Client Key, and Server URL
    - Update `src/environments.js` with your credentials
 3. **Seed the database with test data:**
+   *(Only needed if starting from a clean database or after changing your Back4App/Parse APPLICATION_ID)*
    ```bash
    npm run seed
    ```
