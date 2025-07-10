@@ -1,4 +1,5 @@
 import React from "react";
+import SubtleInfoText from "../shared/SubtleInfoText";
 
 const trendingData = [
   {
@@ -20,11 +21,23 @@ export default function TrendingWidget() {
     <div className="widget">
       <div className="widget-header">
         <h5 className="widget-title">What's happening</h5>
+        <SubtleInfoText>(Preview UI - no real data)</SubtleInfoText>
       </div>
       <div className="widget-content">
         {trendingData.map((trend, index) => (
           <div key={index} className="widget-item">
-            <button type="button" className="trend-item" style={{ background: "none", border: "none", padding: 0, textAlign: "left", width: "100%", cursor: "pointer" }}>
+            <button
+              type="button"
+              className="trend-item"
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                textAlign: "left",
+                width: "100%",
+                cursor: "pointer",
+              }}
+            >
               {/* <div className="trend-category">{trend.category}</div> */}
               <div className="trend-title">{trend.title}</div>
               <div className="trend-count">{trend.count}</div>
