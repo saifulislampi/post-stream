@@ -48,6 +48,10 @@ This project was developed as a class project for [CSE 40693 - Modern Web Develo
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+5. **Test with demo account:**
+   If you've set up correctly and seeded data (or started with the provided Parse config), you should be able to login with:
+   - **Username:** `janedoe` | **Password:** `password123`
+
 ---
 
 ## Database Structure
