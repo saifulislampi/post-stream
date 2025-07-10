@@ -24,11 +24,11 @@ export default function TrendingWidget() {
       <div className="widget-content">
         {trendingData.map((trend, index) => (
           <div key={index} className="widget-item">
-            <a href="#" className="trend-item">
+            <button type="button" className="trend-item" style={{ background: "none", border: "none", padding: 0, textAlign: "left", width: "100%", cursor: "pointer" }}>
               {/* <div className="trend-category">{trend.category}</div> */}
               <div className="trend-title">{trend.title}</div>
               <div className="trend-count">{trend.count}</div>
-            </a>
+            </button>
           </div>
         ))}
       </div>
