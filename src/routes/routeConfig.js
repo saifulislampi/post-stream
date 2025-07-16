@@ -5,6 +5,7 @@ import ExplorePage from "../pages/ExplorePage";
 import AuthModule from "../components/auth/AuthModule";
 import AuthLogin from "../components/auth/AuthLogin";
 import AuthRegister from "../components/auth/AuthRegister";
+import AuthForgotPassword from "../components/auth/AuthForgotPassword";
 
 export const publicRoutes = [
   {
@@ -18,6 +19,10 @@ export const publicRoutes = [
   {
     path: "/register",
     component: AuthRegister,
+  },
+  {
+    path: "/forgot-password",
+    component: AuthForgotPassword,
   },
 ];
 
