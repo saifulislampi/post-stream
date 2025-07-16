@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "./AuthService";
 
 const AuthLogin = ({ onLogin }) => {
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,7 +18,12 @@ const AuthLogin = ({ onLogin }) => {
     setLoading(true);
 
     try {
-      await onLogin(form.username, form.password);
+      if (onLogin) {
+        await onLogin(form.username, form.password);
+      } else {
+        await login(form.username, form.password);
+        navigate("/");
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -75,6 +82,12 @@ const AuthLogin = ({ onLogin }) => {
           <span className="text-muted">Don't have an account? </span>
           <Link to="/register" className="text-decoration-none">
             Create one
+          </Link>
+        </div>
+
+        <div className="text-center mt-2">
+          <Link to="/forgot-password" className="text-decoration-none small">
+            Forgot your password?
           </Link>
         </div>
 

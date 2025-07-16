@@ -142,3 +142,16 @@ export const isAuthenticated = () => {
   const user = Parse.User.current();
   return !!(user && user.getSessionToken());
 };
+
+/**
+ * Request a password reset email
+ */
+export const requestPasswordReset = async (email) => {
+  try {
+    await Parse.User.requestPasswordReset(email);
+    return { success: true };
+  } catch (error) {
+    throw error;
+  }
+};
+
