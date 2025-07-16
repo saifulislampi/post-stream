@@ -233,6 +233,44 @@ body {
   pointer-events: none;
 }
 
+.image-preview {
+  position: relative;
+  margin-top: 12px;
+  border-radius: 16px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.preview-image {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  display: block;
+}
+
+.remove-image-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 1.2rem;
+}
+
+.remove-image-btn:hover {
+  background: rgba(0, 0, 0, 0.9);
+}
+
 .post-submit {
   display: flex;
   align-items: center;
@@ -285,6 +323,26 @@ body {
   font-size: 1rem;
   line-height: 1.4;
   color: var(--text-primary);
+}
+
+.post-image-container {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  max-width: 100%;
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.post-image:hover {
+  transform: scale(1.02);
 }
 
 /* Post List Styles */

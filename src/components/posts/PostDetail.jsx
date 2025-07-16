@@ -129,6 +129,18 @@ export default function PostDetail() {
         </div>
 
         <div className="post-detail-body">{post.body}</div>
+        
+        {/* Post Image */}
+        {post.imageUrl && (
+          <div className="post-image-container mb-3">
+            <img 
+              src={post.imageUrl} 
+              alt="Post attachment" 
+              className="post-image"
+              loading="lazy"
+            />
+          </div>
+        )}
 
         <div className="post-detail-meta">
           {formatTimestamp(post.createdAt)} •{" "}

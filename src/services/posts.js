@@ -20,6 +20,8 @@ const parsePostToPlain = (p) => ({
   tag: p.get("tag"),
   commentsCount: p.get("commentsCount") ?? 0,
   likesCount: p.get("likesCount") ?? 0,
+  image: p.get("image"), // Parse File object for image
+  imageUrl: p.get("image") ? p.get("image").url() : p.get("imageUrl"), // Direct URL for display (Parse File or hosted URL)
 
   // createdAt / updatedAt are native properties on Parse.Object.
   // Fallback to .get() so it still works if someone set them manually.
@@ -108,12 +110,27 @@ export const createPost = async (postData, profile) => {
     const authorId = isParseObj ? profile.id : profile.id;
     const username = isParseObj ? profile.get("username") : profile.username;
 
-    // If we need to increment postsCount later, we’ll need the Parse object.
+    // If we need to increment postsCount later, we'll need the Parse object.
     // Load it only when necessary to avoid an extra query in normal cases.
     let profileObj = isParseObj ? profile : null;
 
     // --------------------------------------------------
-    // 2. Create and save the Post
+    // 2. Handle image upload if present
+    // --------------------------------------------------
+    let imageFile = null;
+    if (postData.image && postData.image instanceof File) {
+      // Handle regular File object (from file input)
+      const fileName = `post_${Date.now()}_${postData.image.name}`;
+      imageFile = new Parse.File(fileName, postData.image);
+      await imageFile.save();
+    } else if (postData.imageUrl) {
+      // Handle Bytescale hosted image URL
+      // We'll store the URL directly since it's already hosted
+      // No need to create a Parse.File for an already hosted image
+    }
+
+    // --------------------------------------------------
+    // 3. Create and save the Post
     // --------------------------------------------------
     const Post = Parse.Object.extend("Post");
     const post = new Post();
@@ -124,11 +141,19 @@ export const createPost = async (postData, profile) => {
     post.set("tag", postData.tag || "general");
     post.set("commentsCount", 0);
     post.set("likesCount", 0);
+    
+    // Set image if uploaded
+    if (imageFile) {
+      post.set("image", imageFile);
+    } else if (postData.imageUrl) {
+      // Store the hosted image URL directly
+      post.set("imageUrl", postData.imageUrl);
+    }
 
     const savedPost = await post.save();
 
     // --------------------------------------------------
-    // 3. Increment the author’s postsCount
+    // 4. Increment the author's postsCount
     // --------------------------------------------------
     if (!profileObj) {
       const Profile = Parse.Object.extend("Profile");

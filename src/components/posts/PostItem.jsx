@@ -68,6 +68,20 @@ export default function PostItem({ post }) {
               </Link>
             </div>
 
+            {/* Post Image */}
+            {post.imageUrl && (
+              <div className="post-image-container mb-2">
+                <Link to={`/post/${post.id}`}>
+                  <img 
+                    src={post.imageUrl} 
+                    alt="Post attachment" 
+                    className="post-image"
+                    loading="lazy"
+                  />
+                </Link>
+              </div>
+            )}
+
             {/* Post Actions */}
             <PostActionBar />
           </div>
