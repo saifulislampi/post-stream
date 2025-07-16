@@ -83,7 +83,7 @@ export default function PostItem({ post }) {
             )}
 
             {/* Post Actions */}
-            <PostActionBar />
+            <PostActionBar post={post} />
           </div>
         </div>
       </div>
