@@ -1,21 +1,50 @@
 import React, { useState } from "react";
+import { UploadButton } from "@bytescale/upload-widget-react";
 
 export default function PostForm({ onAdd, currentUser }) {
   const [body, setBody] = useState("");
-  const [img, setImg] = useState(null);
+  const [uploadedImage, setUploadedImage] = useState(null);
+
+  // Upload widget options
+  const uploadOptions = {
+    apiKey: "free", // Using free tier for development
+    maxFileCount: 1,
+    mimeTypes: ["image/*"],
+    multi: false,
+    showFinishButton: false,
+    styles: {
+      colors: {
+        primary: "#1DA1F2" // Twitter blue
+      }
+    }
+  };
 
   function submit(e) {
     e.preventDefault();
-    if (!body.trim()) return;
+    // Allow posting if there's either text or an image
+    if (!body.trim() && !uploadedImage) return;
     onAdd({
       id: Date.now(),
       body,
       tag: "general", // Default tag, we'll add hashtag parsing later
-      imageName: img?.name || null,
+      image: uploadedImage ? uploadedImage.originalFile.file : null, // Pass the actual File object
+      imageUrl: uploadedImage ? uploadedImage.fileUrl : null, // Pass the hosted URL
     });
     setBody("");
-    setImg(null);
+    setUploadedImage(null);
   }
+
+  // Handle image upload completion
+  const handleImageUpload = (files) => {
+    if (files && files.length > 0) {
+      setUploadedImage(files[0]);
+    }
+  };
+
+  // Handle image removal
+  const handleImageRemove = () => {
+    setUploadedImage(null);
+  };
 
   // Fix: Handle Parse User object and potential undefined values
   const getUserInitial = () => {
@@ -46,20 +75,45 @@ export default function PostForm({ onAdd, currentUser }) {
               maxLength={charLimit}
               rows={3}
             />
+            
+            {/* Image preview */}
+            {uploadedImage && (
+              <div className="image-preview">
+                <img 
+                  src={uploadedImage.fileUrl} 
+                  alt="Preview" 
+                  className="preview-image"
+                />
+                <button 
+                  type="button" 
+                  className="remove-image-btn"
+                  onClick={handleImageRemove}
+                  title="Remove image"
+                >
+                  <i className="bi bi-x"></i>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
         <div className="post-form-footer">
           <div className="post-actions">
-            <label className="action-btn media-btn" title="Add photo">
-              <i className="bi bi-image"></i>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImg(e.target.files[0])}
-                className="file-input"
-              />
-            </label>
+            <UploadButton
+              options={uploadOptions}
+              onComplete={handleImageUpload}
+            >
+              {({ onClick }) => (
+                <button
+                  type="button"
+                  className="action-btn media-btn"
+                  onClick={onClick}
+                  title="Add photo"
+                >
+                  <i className="bi bi-image"></i>
+                </button>
+              )}
+            </UploadButton>
             <button
               type="button"
               className="action-btn emoji-btn"
@@ -86,7 +140,7 @@ export default function PostForm({ onAdd, currentUser }) {
             <button
               type="submit"
               className="post-btn"
-              disabled={!body.trim() || remainingChars < 0}
+              disabled={(!body.trim() && !uploadedImage) || remainingChars < 0}
             >
               Post
             </button>
