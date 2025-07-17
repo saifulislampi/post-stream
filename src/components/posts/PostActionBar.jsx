@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { likePost, unlikePost, isPostLiked } from "../../services/likes.js";
+import { likePost, unlikePost } from "../../services/likes.js";
 import Parse from "parse";
 
 export default function PostActionBar({ post, onReply }) {
@@ -9,21 +9,22 @@ export default function PostActionBar({ post, onReply }) {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkLikeStatus = async () => {
-      try {
-        const currentUser = Parse.User.current();
-        if (currentUser) {
-          const liked = await isPostLiked(currentUser.id, post.id);
-          setIsLiked(liked);
-        }
-      } catch (error) {
-        console.error("Error checking like status:", error);
-      }
-    };
+  // Disabled to prevent 500 errors from Like class queries
+  // useEffect(() => {
+  //   const checkLikeStatus = async () => {
+  //     try {
+  //       const currentUser = Parse.User.current();
+  //       if (currentUser) {
+  //         const liked = await isPostLiked(currentUser.id, post.id);
+  //         setIsLiked(liked);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error checking like status:", error);
+  //     }
+  //   };
 
-    checkLikeStatus();
-  }, [post.id]);
+  //   checkLikeStatus();
+  // }, [post.id]);
 
   const handleLike = async () => {
     const currentUser = Parse.User.current();
