@@ -155,3 +155,83 @@ export const getProfileObjectById = async (profileId) => {
   const Profile = Parse.Object.extend("Profile");
   return new Parse.Query(Profile).get(profileId);
 };
+
+// Helper function to generate UUID-like string
+const generateUUID = () => {
+  // Use crypto.randomUUID if available (modern browsers)
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  
+  // Fallback UUID v4 generation
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : ((r & 0x3) | 0x8);
+    return v.toString(16);
+  });
+};
+
+// Helper function to get file extension from filename
+const getFileExtension = (filename) => {
+  if (!filename || typeof filename !== 'string') {
+    return '';
+  }
+  const lastDotIndex = filename.lastIndexOf('.');
+  if (lastDotIndex === -1 || lastDotIndex === filename.length - 1) {
+    return '';
+  }
+  return filename.substring(lastDotIndex).toLowerCase();
+};
+
+/**
+ * Update profile avatar
+ */
+export const updateProfileAvatar = async (profileId, imageFile) => {
+  try {
+    const Profile = Parse.Object.extend("Profile");
+    const profile = await new Parse.Query(Profile).get(profileId);
+
+    // Handle image upload
+    let avatarFile = null;
+    if (imageFile && imageFile instanceof File) {
+      // Generate a clean filename using timestamp + UUID
+      const timestamp = Date.now();
+      const uuid = generateUUID();
+      const fileExtension = getFileExtension(imageFile.name);
+      const fileName = `avatar_${timestamp}_${uuid}${fileExtension}`;
+      
+      avatarFile = new Parse.File(fileName, imageFile);
+      await avatarFile.save();
+      
+      // Update profile with new avatar
+      profile.set("avatar", avatarFile.url());
+      await profile.save();
+      
+      return parseProfileToPlain(profile);
+    }
+    
+    throw new Error("No valid image file provided");
+  } catch (error) {
+    console.error("Error updating profile avatar:", error);
+    throw error;
+  }
+};
+
+/**
+ * Remove profile avatar
+ */
+export const removeProfileAvatar = async (profileId) => {
+  try {
+    const Profile = Parse.Object.extend("Profile");
+    const profile = await new Parse.Query(Profile).get(profileId);
+    
+    // Remove avatar field
+    profile.unset("avatar");
+    await profile.save();
+    
+    return parseProfileToPlain(profile);
+  } catch (error) {
+    console.error("Error removing profile avatar:", error);
+    throw error;
+  }
+};
