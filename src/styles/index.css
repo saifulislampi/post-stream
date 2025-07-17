@@ -433,8 +433,24 @@ body {
   color: var(--primary);
 }
 
+.post-action.text-danger:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+}
+
 .post-action i {
   font-size: 1.1rem;
+}
+
+/* Like button animations */
+.post-action .bi-heart-fill {
+  animation: heartBeat 0.3s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
 
 /* Reply Section */

@@ -54,7 +54,13 @@ export const createComment = async (commentData, profile, post) => {
 
     comment.set("postId", post.id);
     comment.set("authorId", profile.id);
-    comment.set("authorUsername", profile.get("username"));
+    
+    // Handle both Parse objects and plain objects
+    const username = typeof profile.get === 'function' 
+      ? profile.get("username") 
+      : profile.username || "Unknown";
+    
+    comment.set("authorUsername", username);
     comment.set("body", commentData.body);
 
     const savedComment = await comment.save();

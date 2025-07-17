@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchPostsWithAuthor } from "../../services/posts";
-import { fetchCommentsByPost } from "../../services/comments";
+import { fetchCommentsWithAuthor, createComment } from "../../services/comments";
+import { likePost, unlikePost, isPostLiked } from "../../services/likes";
 import Spinner from "../shared/Spinner";
+import Parse from "parse";
 
 function formatTimestamp(date) {
   const now = new Date();
@@ -30,14 +32,44 @@ export default function PostDetail() {
   const [error, setError] = useState(null);
   const [replyText, setReplyText] = useState("");
   const [replyLoading, setReplyLoading] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(0);
+  const [currentUserProfile, setCurrentUserProfile] = useState(null);
+
+  // Helper function to get current user's profile
+  const getCurrentUserProfile = async () => {
+    const currentUser = Parse.User.current();
+    if (!currentUser) return null;
+    
+    try {
+      const Profile = Parse.Object.extend("Profile");
+      const profileQuery = new Parse.Query(Profile);
+      profileQuery.equalTo("userId", currentUser.id);
+      const userProfile = await profileQuery.first();
+      return userProfile;
+    } catch (error) {
+      console.error("Error fetching current user profile:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     document.title = "Post Details - Post Stream";
     setLoading(true);
     setError(null);
 
-    Promise.all([fetchPostsWithAuthor(), fetchCommentsByPost(id)])
-      .then(([posts, comments]) => {
+    const loadData = async () => {
+      try {
+        // Load current user's profile
+        const userProfile = await getCurrentUserProfile();
+        setCurrentUserProfile(userProfile);
+
+        // Load posts and comments
+        const [posts, comments] = await Promise.all([
+          fetchPostsWithAuthor(), 
+          fetchCommentsWithAuthor(id)
+        ]);
+
         const foundPost = posts.find((p) => p.id === id);
         if (!foundPost) {
           setError(`Post with ID ${id} not found`);
@@ -45,38 +77,129 @@ export default function PostDetail() {
         }
         setPost(foundPost);
         setReplies(comments || []);
-      })
-      .catch((err) => {
+        setLikesCount(foundPost.likesCount || 0);
+        
+        // Debug: log comments to see structure
+        console.log("Fetched comments:", comments);
+        
+        // Check if current user has liked this post
+        const currentUser = Parse.User.current();
+        if (currentUser) {
+          const liked = await isPostLiked(currentUser.id, id);
+          setIsLiked(liked);
+        }
+      } catch (err) {
         console.error("Error fetching data:", err);
         setError("Failed to load post data");
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [id]);
 
   const handleReply = async (e) => {
     e.preventDefault();
     if (!replyText.trim()) return;
 
+    const currentUser = Parse.User.current();
+    if (!currentUser) {
+      navigate("/auth/login");
+      return;
+    }
+
+    let userProfile = currentUserProfile;
+    
+    // If no profile exists, try to create one or use fallback
+    if (!userProfile) {
+      try {
+        // Try to fetch the profile again
+        userProfile = await getCurrentUserProfile();
+        
+        // If still no profile, create a minimal one for comment attribution
+        if (!userProfile) {
+          console.warn("No profile found for user, using fallback data");
+          // Use user data as fallback for comment attribution
+          userProfile = {
+            id: currentUser.id,
+            get: (field) => {
+              switch (field) {
+                case "firstName": return currentUser.get("firstName") || "";
+                case "lastName": return currentUser.get("lastName") || "";
+                case "username": return currentUser.get("username") || "Unknown";
+                default: return null;
+              }
+            }
+          };
+        }
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        alert("Unable to load user profile. Please try again.");
+        return;
+      }
+    }
+
     setReplyLoading(true);
     try {
-      // Simulate adding a reply (implement actual API call)
-      const newReply = {
-        id: Date.now().toString(),
-        body: replyText,
-        userId: "current-user-id",
-        user: {
-          firstName: "Current",
-          lastName: "User",
-        },
-        createdAt: new Date().toISOString(),
+      // Fetch the Parse Post object
+      const Post = Parse.Object.extend("Post");
+      const postQuery = new Parse.Query(Post);
+      const postObj = await postQuery.get(post.id);
+
+      // Create a new comment using the comment service
+      const commentData = { body: replyText };
+      const newComment = await createComment(commentData, userProfile, postObj);
+      
+      // Add author info for display using profile data
+      const commentWithAuthor = {
+        ...newComment,
+        author: {
+          id: userProfile.id,
+          firstName: userProfile.get("firstName") || "",
+          lastName: userProfile.get("lastName") || "",
+          username: userProfile.get("username") || "Unknown",
+        }
       };
 
-      setReplies([newReply, ...replies]);
+      console.log("New comment with author:", commentWithAuthor); // Debug log
+
+      setReplies([commentWithAuthor, ...replies]);
       setReplyText("");
+      
+      // Update post comments count in UI
+      setPost(prev => ({
+        ...prev,
+        commentsCount: (prev.commentsCount || 0) + 1
+      }));
     } catch (err) {
       console.error("Error posting reply:", err);
+      alert("Failed to post reply. Please try again.");
     } finally {
       setReplyLoading(false);
+    }
+  };
+
+  const handleLike = async () => {
+    const currentUser = Parse.User.current();
+    if (!currentUser) {
+      navigate("/auth/login");
+      return;
+    }
+
+    try {
+      if (isLiked) {
+        await unlikePost(currentUser.id, post.id);
+        setIsLiked(false);
+        setLikesCount(prev => Math.max(0, prev - 1));
+      } else {
+        await likePost(currentUser.id, currentUser.get("username"), post.id);
+        setIsLiked(true);
+        setLikesCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error toggling like:", error);
+      alert("Failed to update like. Please try again.");
     }
   };
 
@@ -150,19 +273,22 @@ export default function PostDetail() {
 
       {/* Actions Bar */}
       <div className="post-actions-bar">
-        <button className="post-action">
+        <button className="post-action" onClick={() => document.querySelector('.reply-input').focus()}>
           <i className="bi bi-chat"></i>
-          <span>{replies.length}</span>
+          <span>{post.commentsCount || 0}</span>
         </button>
-        <button className="post-action">
+        <button className="post-action" disabled>
           <i className="bi bi-arrow-repeat"></i>
           <span>0</span>
         </button>
-        <button className="post-action">
-          <i className="bi bi-heart"></i>
-          <span>0</span>
+        <button 
+          className={`post-action ${isLiked ? 'text-danger' : ''}`}
+          onClick={handleLike}
+        >
+          <i className={`bi ${isLiked ? "bi-heart-fill" : "bi-heart"}`}></i>
+          <span>{likesCount}</span>
         </button>
-        <button className="post-action">
+        <button className="post-action" disabled>
           <i className="bi bi-share"></i>
         </button>
       </div>
@@ -174,7 +300,7 @@ export default function PostDetail() {
             className="user-avatar me-3"
             style={{ width: "40px", height: "40px", fontSize: "1rem" }}
           >
-            U
+            {currentUserProfile?.get("firstName")?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="flex-grow-1">
             <input
@@ -206,18 +332,37 @@ export default function PostDetail() {
               className="user-avatar me-3"
               style={{ width: "40px", height: "40px", fontSize: "1rem" }}
             >
-              {reply.user?.firstName?.[0]?.toUpperCase() || "?"}
+              {(() => {
+                // Handle both new comments (with author) and existing comments (with author)
+                const author = reply.author;
+                if (author && author.firstName) {
+                  return author.firstName[0].toUpperCase();
+                }
+                // Fallback to authorUsername if no author info
+                const username = reply.authorUsername || "U";
+                return username[0].toUpperCase();
+              })()}
             </div>
             <div className="reply-content">
               <div className="reply-author">
                 <span className="fw-bold me-2">
-                  {reply.user?.firstName && reply.user?.lastName
-                    ? `${reply.user.firstName} ${reply.user.lastName}`
-                    : "Unknown User"}
+                  {(() => {
+                    // Handle both new comments (with author) and existing comments (with author)
+                    const author = reply.author;
+                    if (author) {
+                      if (author.firstName && author.lastName) {
+                        return `${author.firstName} ${author.lastName}`;
+                      } else if (author.firstName || author.lastName) {
+                        return author.firstName || author.lastName;
+                      }
+                    }
+                    // Fallback to authorUsername if no author info
+                    return reply.authorUsername || "Unknown User";
+                  })()}
                 </span>
-                {reply.user?.username && (
+                {reply.author?.username && (
                   <span className="text-muted me-2">
-                    @{reply.user.username}
+                    @{reply.author.username}
                   </span>
                 )}
                 <span className="text-muted">
