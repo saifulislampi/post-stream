@@ -11,6 +11,33 @@ if (!Parse.applicationId) {
   Parse.serverURL = SERVER_URL;
 }
 
+// Helper function to generate UUID-like string
+const generateUUID = () => {
+  // Use crypto.randomUUID if available (modern browsers)
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  
+  // Fallback UUID v4 generation
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : ((r & 0x3) | 0x8);
+    return v.toString(16);
+  });
+};
+
+// Helper function to get file extension from filename
+const getFileExtension = (filename) => {
+  if (!filename || typeof filename !== 'string') {
+    return '';
+  }
+  const lastDotIndex = filename.lastIndexOf('.');
+  if (lastDotIndex === -1 || lastDotIndex === filename.length - 1) {
+    return '';
+  }
+  return filename.substring(lastDotIndex).toLowerCase();
+};
+
 // Helper function to convert Parse Post object to plain object
 const parsePostToPlain = (p) => ({
   id: p.id,
@@ -155,7 +182,12 @@ export const createPost = async (postData, profile) => {
     let imageFile = null;
     if (postData.image && postData.image instanceof File) {
       // Handle regular File object (from file input)
-      const fileName = `post_${Date.now()}_${postData.image.name}`;
+      // Generate a clean filename using timestamp + UUID
+      const timestamp = Date.now();
+      const uuid = generateUUID();
+      const fileExtension = getFileExtension(postData.image.name);
+      const fileName = `post_${timestamp}_${uuid}${fileExtension}`;
+      
       imageFile = new Parse.File(fileName, postData.image);
       await imageFile.save();
     } else if (postData.imageUrl) {
