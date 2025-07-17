@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import Logo from "./Logo";
+import Avatar from "../shared/Avatar";
 
 export default function Header({ currentUser, currentProfile, onLogout }) {
   const location = useLocation();
@@ -55,12 +56,7 @@ export default function Header({ currentUser, currentProfile, onLogout }) {
           {currentProfile && (
             <div className="mt-auto mb-3">
               <div className="user-info-card">
-                <div
-                  className="profile-avatar me-3"
-                  style={{ width: 40, height: 40, fontSize: "1.2rem" }}
-                >
-                  {currentProfile.firstName?.[0]?.toUpperCase() || "?"}
-                </div>
+                <Avatar profile={currentProfile} size={40} className="me-3" />
                 <div className="flex-grow-1">
                   <div className="fw-bold small">
                     {currentProfile.firstName} {currentProfile.lastName}
@@ -148,12 +144,7 @@ export default function Header({ currentUser, currentProfile, onLogout }) {
 
               {currentProfile && (
                 <div className="navbar-text ms-3 d-flex align-items-center">
-                  <div
-                    className="profile-avatar me-2"
-                    style={{ width: 32, height: 32, fontSize: "1rem" }}
-                  >
-                    {currentProfile.firstName?.[0]?.toUpperCase() || "?"}
-                  </div>
+                  <Avatar profile={currentProfile} size={32} fontSize="1rem" className="me-2" />
                   <span className="small me-2">
                     {currentProfile.firstName} {currentProfile.lastName}
                   </span>

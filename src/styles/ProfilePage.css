@@ -44,6 +44,44 @@
   z-index: 2;
 }
 
+/* Profile Photo Upload Styles */
+.profile-avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-photo-upload-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  cursor: pointer;
+  z-index: 3;
+}
+
+.profile-avatar-container:hover .profile-photo-upload-overlay {
+  opacity: 1;
+}
+
+.upload-icon {
+  color: white;
+  font-size: 1.5rem;
+}
+
+.upload-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .profile-follow-btn {
   background: var(--text-primary);
   color: white;

@@ -171,6 +171,10 @@ body {
   flex-shrink: 0;
 }
 
+.post-form-avatar {
+  flex-shrink: 0;
+}
+
 .form-content {
   flex: 1;
   min-width: 0;

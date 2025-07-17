@@ -4,6 +4,7 @@ import { fetchPostsWithAuthor } from "../../services/posts";
 import { fetchCommentsWithAuthor, createComment } from "../../services/comments";
 import { likePost, unlikePost, isPostLiked } from "../../services/likes";
 import Spinner from "../shared/Spinner";
+import Avatar from "../shared/Avatar";
 import Parse from "parse";
 
 function formatTimestamp(date) {
@@ -230,12 +231,7 @@ export default function PostDetail() {
       {/* Post Content */}
       <div className="post-detail-content">
         <div className="post-detail-main">
-          <div
-            className="user-avatar me-3"
-            style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}
-          >
-            {postAuthor.firstName?.[0]?.toUpperCase() || "?"}
-          </div>
+          <Avatar profile={postAuthor} size={48} className="me-3" />
           <div className="flex-grow-1">
             <div className="d-flex align-items-center mb-1">
               <span className="fw-bold me-2">{fullName}</span>
@@ -291,12 +287,15 @@ export default function PostDetail() {
       {/* Reply Section */}
       <div className="reply-section">
         <form onSubmit={handleReply} className="reply-form">
-          <div
-            className="user-avatar me-3"
-            style={{ width: "40px", height: "40px", fontSize: "1rem" }}
-          >
-            {currentUserProfile?.get("firstName")?.[0]?.toUpperCase() || "?"}
-          </div>
+          <Avatar 
+            profile={{
+              firstName: currentUserProfile?.get("firstName"),
+              lastName: currentUserProfile?.get("lastName"),
+              avatar: currentUserProfile?.get("avatar")
+            }}
+            size={40}
+            className="me-3"
+          />
           <div className="flex-grow-1">
             <input
               type="text"
@@ -323,21 +322,15 @@ export default function PostDetail() {
       <div className="replies-list">
         {replies.map((reply) => (
           <div key={reply.id} className="reply-item">
-            <div
-              className="user-avatar me-3"
-              style={{ width: "40px", height: "40px", fontSize: "1rem" }}
-            >
-              {(() => {
-                // Handle both new comments (with author) and existing comments (with author)
-                const author = reply.author;
-                if (author && author.firstName) {
-                  return author.firstName[0].toUpperCase();
-                }
-                // Fallback to authorUsername if no author info
-                const username = reply.authorUsername || "U";
-                return username[0].toUpperCase();
-              })()}
-            </div>
+            <Avatar 
+              profile={reply.author || {
+                firstName: reply.authorUsername?.[0] || "U",
+                lastName: "",
+                avatar: null
+              }}
+              size={40}
+              className="me-3"
+            />
             <div className="reply-content">
               <div className="reply-author">
                 <span className="fw-bold me-2">

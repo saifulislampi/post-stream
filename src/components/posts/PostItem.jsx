@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import PostActionBar from "./PostActionBar";
 import RetweetedPost from "./RetweetedPost";
+import Avatar from "../shared/Avatar";
 
 function formatTimestamp(date) {
   const now = new Date();
@@ -37,12 +38,7 @@ export default function PostItem({ post }) {
             to={`/profile/${postAuthor.id}`}
             className="text-decoration-none"
           >
-            <div
-              className="profile-avatar"
-              style={{ width: "48px", height: "48px", fontSize: "1.2rem" }}
-            >
-              {postAuthor.firstName?.[0]?.toUpperCase() || "?"}
-            </div>
+            <Avatar profile={postAuthor} size={48} />
           </Link>
 
           {/* Post Content */}

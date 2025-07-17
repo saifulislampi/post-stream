@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { UploadButton } from "@bytescale/upload-widget-react";
+import Avatar from "../shared/Avatar";
 
-export default function PostForm({ onAdd, currentUser }) {
+export default function PostForm({ onAdd, currentUser, currentProfile }) {
   const [body, setBody] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
 
@@ -46,18 +47,6 @@ export default function PostForm({ onAdd, currentUser }) {
     setUploadedImage(null);
   };
 
-  // Fix: Handle Parse User object and potential undefined values
-  const getUserInitial = () => {
-    if (!currentUser) return "?";
-
-    // For Parse User, access firstName using .get() method
-    const firstName = currentUser.get
-      ? currentUser.get("firstName")
-      : currentUser.firstName;
-    return firstName ? firstName[0].toUpperCase() : "?";
-  };
-
-  const userInitial = getUserInitial();
   const charLimit = 280;
   const remainingChars = charLimit - body.length;
 
@@ -65,7 +54,7 @@ export default function PostForm({ onAdd, currentUser }) {
     <div className="post-form-container">
       <form onSubmit={submit} className="post-form">
         <div className="post-form-header">
-          <div className="user-avatar">{userInitial}</div>
+          <Avatar profile={currentProfile} size={48} className="post-form-avatar" />
           <div className="form-content">
             <textarea
               className="post-textarea"

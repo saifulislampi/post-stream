@@ -10,6 +10,7 @@ import {
 import { getCurrentUser } from "../components/auth/AuthService";
 import Spinner from "../components/shared/Spinner";
 import PostList from "../components/posts/PostList";
+import ProfilePhotoUpload from "../components/profile/ProfilePhotoUpload";
 
 import "../styles/ProfilePage.css";
 
@@ -117,6 +118,10 @@ export default function ProfilePage() {
     }
   }, [profileId, currentProfile, navigate]);
 
+  const handleProfileUpdate = (updatedProfile) => {
+    setProfile(updatedProfile);
+  };
+
   const handleFollowToggle = async () => {
     if (!currentProfile) return;
     setFollowLoading(true);
@@ -186,15 +191,23 @@ export default function ProfilePage() {
 
         <div className="profile-details">
           <div className="d-flex justify-content-between align-items-start mb-3">
-            <div className="profile-avatar-large">
-              {profile.avatar ? (
-                <img
-                  src={profile.avatar}
-                  alt="profile"
-                  className="w-100 h-100 rounded-circle"
+            <div className="profile-avatar-container">
+              <div className="profile-avatar-large">
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt="profile"
+                    className="w-100 h-100 rounded-circle"
+                  />
+                ) : (
+                  getInitials(profile)
+                )}
+              </div>
+              {isOwnProfile && (
+                <ProfilePhotoUpload 
+                  profile={profile} 
+                  onProfileUpdate={handleProfileUpdate} 
                 />
-              ) : (
-                getInitials(profile)
               )}
             </div>
 
