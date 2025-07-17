@@ -20,8 +20,16 @@ const parsePostToPlain = (p) => ({
   tag: p.get("tag"),
   commentsCount: p.get("commentsCount") ?? 0,
   likesCount: p.get("likesCount") ?? 0,
+  retweetsCount: p.get("retweetsCount") ?? 0,
   image: p.get("image"), // Parse File object for image
   imageUrl: p.get("image") ? p.get("image").url() : p.get("imageUrl"), // Direct URL for display (Parse File or hosted URL)
+  
+  // Retweet fields
+  isRetweet: p.get("isRetweet") ?? false,
+  originalPostId: p.get("originalPostId"),
+  originalPost: p.get("originalPost") ? parsePostToPlain(p.get("originalPost")) : null,
+  retweetedBy: p.get("retweetedBy"), // Who retweeted this post
+  retweetedByUsername: p.get("retweetedByUsername"),
 
   // createdAt / updatedAt are native properties on Parse.Object.
   // Fallback to .get() so it still works if someone set them manually.
@@ -39,6 +47,9 @@ export const fetchPosts = async (limit = 20, skip = 0) => {
     query.descending("createdAt");
     query.limit(limit);
     query.skip(skip);
+    
+    // Include original post for retweets
+    query.include("originalPost");
 
     const posts = await query.find();
     return posts.map(parsePostToPlain);
@@ -55,14 +66,23 @@ export const fetchPostsWithAuthor = async (limit = 20, skip = 0) => {
   try {
     const posts = await fetchPosts(limit, skip);
 
-    // Get unique author IDs
-    const authorIds = [...new Set(posts.map((post) => post.authorId))];
+    // Get unique author IDs (including original post authors for retweets and retweeter IDs)
+    const authorIds = [...new Set(posts.map((post) => {
+      if (post.isRetweet && post.originalPost) {
+        return post.originalPost.authorId; // For displaying original author info
+      }
+      return post.authorId; // For regular posts and retweeter info
+    }))];
+
+    // Also get retweeter IDs for retweets
+    const retweeterIds = [...new Set(posts.filter(post => post.isRetweet).map(post => post.authorId))];
+    const allIds = [...new Set([...authorIds, ...retweeterIds])];
 
     // Import profile service to avoid circular dependencies
     const { fetchProfilesByIds } = await import("./profiles.js");
 
     // Fetch author profiles
-    const profiles = await fetchProfilesByIds(authorIds);
+    const profiles = await fetchProfilesByIds(allIds);
 
     // Create a lookup map for O(1) access
     const profileMap = new Map(
@@ -70,10 +90,25 @@ export const fetchPostsWithAuthor = async (limit = 20, skip = 0) => {
     );
 
     // Attach author data to posts
-    return posts.map((post) => ({
-      ...post,
-      author: profileMap.get(post.authorId) || null,
-    }));
+    return posts.map((post) => {
+      if (post.isRetweet && post.originalPost) {
+        // For retweets, attach both the original post author's profile and the retweeter's profile
+        return {
+          ...post,
+          author: profileMap.get(post.authorId) || null, // Retweeter's profile
+          originalPost: {
+            ...post.originalPost,
+            author: profileMap.get(post.originalPost.authorId) || null, // Original author's profile
+          }
+        };
+      } else {
+        // For regular posts, attach the post author's profile
+        return {
+          ...post,
+          author: profileMap.get(post.authorId) || null,
+        };
+      }
+    });
   } catch (error) {
     console.error("Error fetching posts with author:", error);
     return [];
@@ -141,6 +176,8 @@ export const createPost = async (postData, profile) => {
     post.set("tag", postData.tag || "general");
     post.set("commentsCount", 0);
     post.set("likesCount", 0);
+    post.set("retweetsCount", 0);
+    post.set("isRetweet", false);
     
     // Set image if uploaded
     if (imageFile) {
@@ -170,16 +207,22 @@ export const createPost = async (postData, profile) => {
 };
 
 /**
- * Fetch posts by a specific profile
+ * Fetch posts by a specific profile (including both authored posts and retweets)
  */
 export const fetchPostsByProfile = async (profileId, limit = 20, skip = 0) => {
   try {
     const Post = Parse.Object.extend("Post");
+    
+    // Query for posts authored by this profile (including retweets)
+    // Since retweets now have authorId set to the retweeter, this will get both
     const query = new Parse.Query(Post);
     query.equalTo("authorId", profileId);
     query.descending("createdAt");
     query.limit(limit);
     query.skip(skip);
+    
+    // Include original post for retweets
+    query.include("originalPost");
 
     const posts = await query.find();
     return posts.map(parsePostToPlain);
@@ -204,6 +247,62 @@ export const searchPosts = async (searchTerm, limit = 20) => {
     return posts.map(parsePostToPlain);
   } catch (error) {
     console.error("Error searching posts:", error);
+    return [];
+  }
+};
+
+/**
+ * Fetch posts by a specific profile with author data
+ */
+export const fetchPostsByProfileWithAuthor = async (profileId, limit = 20, skip = 0) => {
+  try {
+    const posts = await fetchPostsByProfile(profileId, limit, skip);
+
+    // Get unique author IDs (including original post authors for retweets and retweeter IDs)
+    const authorIds = [...new Set(posts.map((post) => {
+      if (post.isRetweet && post.originalPost) {
+        return post.originalPost.authorId; // For displaying original author info
+      }
+      return post.authorId; // For regular posts and retweeter info
+    }))];
+
+    // Also get retweeter IDs for retweets
+    const retweeterIds = [...new Set(posts.filter(post => post.isRetweet).map(post => post.authorId))];
+    const allIds = [...new Set([...authorIds, ...retweeterIds])];
+
+    // Import profile service to avoid circular dependencies
+    const { fetchProfilesByIds } = await import("./profiles.js");
+
+    // Fetch author profiles
+    const profiles = await fetchProfilesByIds(allIds);
+
+    // Create a lookup map for O(1) access
+    const profileMap = new Map(
+      profiles.map((profile) => [profile.id, profile])
+    );
+
+    // Attach author data to posts
+    return posts.map((post) => {
+      if (post.isRetweet && post.originalPost) {
+        // For retweets, attach both the original post author's profile and the retweeter's profile
+        return {
+          ...post,
+          author: profileMap.get(post.authorId) || null, // Retweeter's profile
+          originalPost: {
+            ...post.originalPost,
+            author: profileMap.get(post.originalPost.authorId) || null, // Original author's profile
+          }
+        };
+      } else {
+        // For regular posts, attach the post author's profile
+        return {
+          ...post,
+          author: profileMap.get(post.authorId) || null,
+        };
+      }
+    });
+  } catch (error) {
+    console.error(`Error fetching posts for profile ${profileId} with author:`, error);
     return [];
   }
 };

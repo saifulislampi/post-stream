@@ -1,30 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { likePost, unlikePost } from "../../services/likes.js";
+import { retweetPost, unretweetPost } from "../../services/retweets.js";
 import Parse from "parse";
 
 export default function PostActionBar({ post, onReply }) {
   const [isLiked, setIsLiked] = useState(false);
+  const [isRetweeted, setIsRetweeted] = useState(false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [retweetsCount, setRetweetsCount] = useState(post.retweetsCount || 0);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
-  // Disabled to prevent 500 errors from Like class queries
-  // useEffect(() => {
-  //   const checkLikeStatus = async () => {
-  //     try {
-  //       const currentUser = Parse.User.current();
-  //       if (currentUser) {
-  //         const liked = await isPostLiked(currentUser.id, post.id);
-  //         setIsLiked(liked);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error checking like status:", error);
-  //     }
-  //   };
-
-  //   checkLikeStatus();
-  // }, [post.id]);
 
   const handleLike = async () => {
     const currentUser = Parse.User.current();
@@ -51,6 +37,43 @@ export default function PostActionBar({ post, onReply }) {
     }
   };
 
+  const handleRetweet = async () => {
+    const currentUser = Parse.User.current();
+    if (!currentUser) {
+      navigate("/auth/login");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      // Get the current user's profile ID
+      const { fetchProfileByUserId } = await import("../../services/profiles.js");
+      const currentProfile = await fetchProfileByUserId(currentUser.id);
+      
+      if (!currentProfile) {
+        console.error("Current user profile not found");
+        return;
+      }
+
+      // Use the original post ID for retweet operations
+      const targetPostId = post.originalPostId || post.id;
+      
+      if (isRetweeted) {
+        await unretweetPost(currentProfile.id, targetPostId);
+        setIsRetweeted(false);
+        setRetweetsCount(prev => Math.max(0, prev - 1));
+      } else {
+        await retweetPost(currentProfile.id, currentProfile.username, targetPostId);
+        setIsRetweeted(true);
+        setRetweetsCount(prev => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error toggling retweet:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleReply = () => {
     if (onReply) {
       onReply();
@@ -72,11 +95,17 @@ export default function PostActionBar({ post, onReply }) {
         )}
       </button>
       <button
-        className="btn btn-link text-muted p-0"
-        title="Repost"
-        disabled
+        className={`btn btn-link p-0 d-flex align-items-center gap-1 ${
+          isRetweeted ? "text-success" : "text-muted"
+        }`}
+        title={isRetweeted ? "Unretweet" : "Retweet"}
+        onClick={handleRetweet}
+        disabled={isLoading}
       >
         <i className="bi bi-arrow-repeat" style={{ fontSize: "1.2rem" }}></i>
+        {retweetsCount > 0 && (
+          <span style={{ fontSize: "0.9rem" }}>{retweetsCount}</span>
+        )}
       </button>
       <button
         className={`btn btn-link p-0 d-flex align-items-center gap-1 ${

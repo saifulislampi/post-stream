@@ -24,7 +24,6 @@ const suggestedUsers = [
 
 export default function WhoToFollowWidget() {
   const handleFollow = (userId) => {
-    console.log(`Following user ${userId}`);
     // Implement follow functionality
   };
 
