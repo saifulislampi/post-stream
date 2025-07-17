@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import PostActionBar from "./PostActionBar";
+import RetweetedPost from "./RetweetedPost";
 
 function formatTimestamp(date) {
   const now = new Date();
@@ -15,6 +16,11 @@ function formatTimestamp(date) {
 }
 
 export default function PostItem({ post }) {
+  // If this is a retweet, use the RetweetedPost component
+  if (post.isRetweet) {
+    return <RetweetedPost post={post} />;
+  }
+
   const postAuthor = post.author || {};
   const fullName =
     postAuthor.firstName && postAuthor.lastName

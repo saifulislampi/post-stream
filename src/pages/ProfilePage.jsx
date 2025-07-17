@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchPostsWithAuthor } from "../services/posts";
+import { fetchPostsByProfileWithAuthor } from "../services/posts";
 import { fetchProfileById, fetchProfileByUserId } from "../services/profiles";
 import {
   isFollowing,
@@ -67,7 +67,7 @@ export default function ProfilePage() {
         try {
           profileData = await fetchProfileById(profileId);
         } catch (error) {
-          console.log("Not a Profile ID, trying as User ID...");
+          // Try fetching by User ID instead
         }
 
         // If that fails, try to fetch by User ID
@@ -93,9 +93,9 @@ export default function ProfilePage() {
 
         setProfile(profileData);
 
-        // Get posts by this profile
-        const allPosts = await fetchPostsWithAuthor();
-        setPosts(allPosts.filter((p) => p.authorId === profileData.id));
+        // Get posts by this profile with author information
+        const profilePosts = await fetchPostsByProfileWithAuthor(profileData.id);
+        setPosts(profilePosts);
 
         // Check if current user is following this profile
         if (currentProfile && currentProfile.id !== profileData.id) {

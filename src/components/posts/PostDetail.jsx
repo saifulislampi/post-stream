@@ -79,9 +79,6 @@ export default function PostDetail() {
         setReplies(comments || []);
         setLikesCount(foundPost.likesCount || 0);
         
-        // Debug: log comments to see structure
-        console.log("Fetched comments:", comments);
-        
         // Check if current user has liked this post
         const currentUser = Parse.User.current();
         if (currentUser) {
@@ -161,8 +158,6 @@ export default function PostDetail() {
           username: userProfile.get("username") || "Unknown",
         }
       };
-
-      console.log("New comment with author:", commentWithAuthor); // Debug log
 
       setReplies([commentWithAuthor, ...replies]);
       setReplyText("");
