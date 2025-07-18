@@ -84,6 +84,24 @@ const INITIAL_COMMENTS = [
   { postIndex: 2, authorIndex: 1, body: "Space facts are always fascinating!" },
 ];
 
+const INITIAL_LIKES = [
+  { postIndex: 0, userIndex: 1 }, // John likes Jane's launch post
+  { postIndex: 0, userIndex: 2 }, // Ada likes Jane's launch post
+  { postIndex: 1, userIndex: 0 }, // Jane likes John's coffee post
+  { postIndex: 1, userIndex: 2 }, // Ada likes John's coffee post
+  { postIndex: 2, userIndex: 0 }, // Jane likes Ada's space fact
+  { postIndex: 2, userIndex: 1 }, // John likes Ada's space fact
+  { postIndex: 3, userIndex: 1 }, // John likes Jane's React post
+  { postIndex: 4, userIndex: 0 }, // Jane likes Ada's algorithm post
+  { postIndex: 4, userIndex: 1 }, // John likes Ada's algorithm post
+];
+
+const INITIAL_RETWEETS = [
+  { postIndex: 2, userIndex: 1 }, // John retweets Ada's space fact
+  { postIndex: 4, userIndex: 0 }, // Jane retweets Ada's algorithm post
+  { postIndex: 0, userIndex: 2 }, // Ada retweets Jane's launch post
+];
+
 async function seedUsers() {
   console.log("📝 Seeding users and profiles...");
   const createdUsers = [];
@@ -151,6 +169,11 @@ async function seedPosts(profiles) {
       post.set("tag", postData.tag);
       post.set("likesCount", 0);
       post.set("commentsCount", 0);
+      post.set("retweetsCount", 0);
+      post.set("isRetweet", false);
+      post.set("originalPostId", null);
+      post.set("retweetedBy", null);
+      post.set("retweetedByUsername", null);
 
       const savedPost = await post.save(null, { useMasterKey: true });
       createdPosts.push(savedPost);
@@ -239,6 +262,91 @@ async function seedComments(posts, profiles) {
   }
 }
 
+async function seedLikes(posts, users, profiles) {
+  console.log("\n❤️ Seeding likes...");
+
+  for (const likeData of INITIAL_LIKES) {
+    try {
+      const Like = Parse.Object.extend("Like");
+      const like = new Like();
+      const post = posts[likeData.postIndex];
+      const user = users[likeData.userIndex];
+      const profile = profiles[likeData.userIndex];
+
+      like.set("postId", post.id);
+      like.set("userId", user.id);
+      like.set("username", profile.get("username"));
+
+      await like.save(null, { useMasterKey: true });
+
+      // Increment post's like count
+      post.increment("likesCount");
+      await post.save(null, { useMasterKey: true });
+
+      console.log(
+        `✓ @${profile.get("username")} liked post: "${post.get("body").substring(0, 30)}..."`
+      );
+    } catch (error) {
+      console.error(`✗ Error creating like:`, error.message);
+    }
+  }
+}
+
+async function seedRetweets(posts, users, profiles) {
+  console.log("\n🔄 Seeding retweets...");
+  const createdRetweets = [];
+
+  for (const retweetData of INITIAL_RETWEETS) {
+    try {
+      const originalPost = posts[retweetData.postIndex];
+      const user = users[retweetData.userIndex];
+      const profile = profiles[retweetData.userIndex];
+
+      // Create Retweet relationship
+      const Retweet = Parse.Object.extend("Retweet");
+      const retweet = new Retweet();
+      retweet.set("postId", originalPost.id);
+      retweet.set("userId", user.id);
+      retweet.set("username", profile.get("username"));
+      await retweet.save(null, { useMasterKey: true });
+
+      // Create retweet post
+      const Post = Parse.Object.extend("Post");
+      const retweetPost = new Post();
+      retweetPost.set("authorId", profile.id);
+      retweetPost.set("authorUsername", profile.get("username"));
+      retweetPost.set("body", ""); // Retweets have empty body
+      retweetPost.set("tag", originalPost.get("tag"));
+      retweetPost.set("likesCount", 0);
+      retweetPost.set("commentsCount", 0);
+      retweetPost.set("retweetsCount", 0);
+      retweetPost.set("isRetweet", true);
+      retweetPost.set("originalPostId", originalPost.id);
+      retweetPost.set("retweetedBy", profile.id);
+      retweetPost.set("retweetedByUsername", profile.get("username"));
+
+      const savedRetweetPost = await retweetPost.save(null, { useMasterKey: true });
+      createdRetweets.push(savedRetweetPost);
+
+      // Increment original post's retweet count
+      originalPost.increment("retweetsCount");
+      await originalPost.save(null, { useMasterKey: true });
+
+      // Increment author's post count
+      profile.increment("postsCount");
+      await profile.save(null, { useMasterKey: true });
+
+      console.log(
+        `✓ @${profile.get("username")} retweeted: "${originalPost.get("body").substring(0, 30)}..."`
+      );
+    } catch (error) {
+      console.error(`✗ Error creating retweet:`, error.message);
+    }
+  }
+
+  return createdRetweets;
+}
+
 async function displaySummary(profiles, posts) {
   console.log("\n📊 Database Summary:");
   console.log("=====================================");
@@ -252,6 +360,8 @@ async function displaySummary(profiles, posts) {
 
   console.log(`\nTotal posts: ${posts.length}`);
   console.log(`Total comments: ${INITIAL_COMMENTS.length}`);
+  console.log(`Total likes: ${INITIAL_LIKES.length}`);
+  console.log(`Total retweets: ${INITIAL_RETWEETS.length}`);
   console.log("=====================================");
 }
 
@@ -264,7 +374,9 @@ async function seedDatabase() {
     const posts = await seedPosts(profiles);
     await seedFollows(profiles);
     await seedComments(posts, profiles);
-    await displaySummary(profiles, posts);
+    await seedLikes(posts, users, profiles);
+    const retweetPosts = await seedRetweets(posts, users, profiles);
+    await displaySummary(profiles, [...posts, ...retweetPosts]);
 
     console.log("\n✅ Database seeding completed successfully!");
   } catch (error) {
