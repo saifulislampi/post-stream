@@ -322,6 +322,7 @@ async function seedRetweets(posts, users, profiles) {
       retweetPost.set("retweetsCount", 0);
       retweetPost.set("isRetweet", true);
       retweetPost.set("originalPostId", originalPost.id);
+      retweetPost.set("originalPost", originalPost); // Set Parse pointer to original post
       retweetPost.set("retweetedBy", profile.id);
       retweetPost.set("retweetedByUsername", profile.get("username"));
 
