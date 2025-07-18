@@ -21,8 +21,40 @@ async function cleanupDatabase() {
 
     // Clean up in reverse dependency order
 
-    // 1. Clean up Comments
-    console.log("Cleaning up Comments...");
+    // 1. Clean up Likes
+    console.log("Cleaning up Likes...");
+    try {
+      const LikeQuery = new Parse.Query("Like");
+      LikeQuery.limit(1000);
+      const likes = await LikeQuery.find({ useMasterKey: true });
+      if (likes.length > 0) {
+        await Parse.Object.destroyAll(likes, { useMasterKey: true });
+        console.log(`✓ Deleted ${likes.length} likes`);
+      } else {
+        console.log("✓ No likes found");
+      }
+    } catch (error) {
+      console.error("✗ Error deleting likes:", error.message);
+    }
+
+    // 2. Clean up Retweets
+    console.log("\nCleaning up Retweets...");
+    try {
+      const RetweetQuery = new Parse.Query("Retweet");
+      RetweetQuery.limit(1000);
+      const retweets = await RetweetQuery.find({ useMasterKey: true });
+      if (retweets.length > 0) {
+        await Parse.Object.destroyAll(retweets, { useMasterKey: true });
+        console.log(`✓ Deleted ${retweets.length} retweets`);
+      } else {
+        console.log("✓ No retweets found");
+      }
+    } catch (error) {
+      console.error("✗ Error deleting retweets:", error.message);
+    }
+
+    // 3. Clean up Comments
+    console.log("\nCleaning up Comments...");
     try {
       const CommentQuery = new Parse.Query("Comment");
       CommentQuery.limit(1000);
@@ -37,7 +69,7 @@ async function cleanupDatabase() {
       console.error("✗ Error deleting comments:", error.message);
     }
 
-    // 2. Clean up Follow relationships
+    // 4. Clean up Follow relationships
     console.log("\nCleaning up Follow relationships...");
     try {
       const FollowQuery = new Parse.Query("Follow");
@@ -53,7 +85,7 @@ async function cleanupDatabase() {
       console.error("✗ Error deleting follows:", error.message);
     }
 
-    // 3. Clean up Posts
+    // 5. Clean up Posts
     console.log("\nCleaning up Posts...");
     try {
       const PostQuery = new Parse.Query("Post");
@@ -69,7 +101,7 @@ async function cleanupDatabase() {
       console.error("✗ Error deleting posts:", error.message);
     }
 
-    // 4. Clean up Profiles
+    // 6. Clean up Profiles
     console.log("\nCleaning up Profiles...");
     try {
       const ProfileQuery = new Parse.Query("Profile");
@@ -85,7 +117,7 @@ async function cleanupDatabase() {
       console.error("✗ Error deleting profiles:", error.message);
     }
 
-    // 5. Clean up Parse Users
+    // 7. Clean up Parse Users
     console.log("\nCleaning up Parse Users...");
     try {
       const UserQuery = new Parse.Query(Parse.User);
