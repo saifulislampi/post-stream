@@ -286,6 +286,72 @@ export const searchPosts = async (searchTerm, limit = 20) => {
 };
 
 /**
+ * Fetch feed posts (posts by users the current profile follows) with author data
+ * Paginated: max `limit` per page, `skip` offset
+ */
+export const fetchFeedPostsWithAuthor = async (
+  profileId,
+  limit = 100,
+  skip = 0
+) => {
+  try {
+    // 1. Get list of followings
+    const Follow = Parse.Object.extend("Follow");
+    const followQuery = new Parse.Query(Follow);
+    followQuery.equalTo("followerId", profileId);
+    followQuery.limit(1000);
+    const followObjs = await followQuery.find();
+    const followingIds = followObjs.map(f => f.get("followingId"));
+    if (!followingIds.length) return [];
+
+    // 2. Fetch posts by those users
+    const Post = Parse.Object.extend("Post");
+    const query = new Parse.Query(Post);
+    query.containedIn("authorId", followingIds);
+    query.descending("createdAt");
+    query.limit(limit);
+    query.skip(skip);
+    query.include("originalPost");
+    const posts = await query.find();
+    const plains = posts.map(parsePostToPlain);
+
+    // 3. Attach author profiles
+    const { fetchProfilesByIds } = await import("./profiles.js");
+    // Gather IDs for authors and retweeters
+    const authorIds = new Set();
+    const retweeterIds = new Set();
+    plains.forEach(p => {
+      if (p.isRetweet && p.originalPost) {
+        authorIds.add(p.originalPost.authorId);
+        retweeterIds.add(p.authorId);
+      } else {
+        authorIds.add(p.authorId);
+      }
+    });
+    const allIds = Array.from(new Set([...authorIds, ...retweeterIds]));
+    const profiles = await fetchProfilesByIds(allIds);
+    const profileMap = new Map(profiles.map(pr => [pr.id, pr]));
+
+    return plains.map(p => {
+      if (p.isRetweet && p.originalPost) {
+        return {
+          ...p,
+          author: profileMap.get(p.authorId) || null,
+          originalPost: {
+            ...p.originalPost,
+            author: profileMap.get(p.originalPost.authorId) || null,
+          },
+        };
+      }
+      return { ...p, author: profileMap.get(p.authorId) || null };
+    });
+  } catch (error) {
+    console.error("Error fetching feed posts:", error);
+    return [];
+  }
+};
+
+/**
  * Fetch posts by a specific profile with author data
  */
 export const fetchPostsByProfileWithAuthor = async (profileId, limit = 20, skip = 0) => {

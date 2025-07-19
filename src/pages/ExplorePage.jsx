@@ -4,6 +4,8 @@ import SearchInput from "../components/shared/SearchInput";
 import { fetchPostsWithAuthor } from "../services/posts";
 import Spinner from "../components/shared/Spinner";
 
+// Number of posts per page for Explore
+const PAGE_SIZE = 20;
 export default function ExplorePage() {
   // TODO: Add debounce to search input for better UX
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,23 +13,34 @@ export default function ExplorePage() {
   const [allPosts, setAllPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
 
-  // Load all posts initially
+  // Load first page of posts initially
   useEffect(() => {
     const loadPosts = async () => {
+      setLoading(true);
       try {
-        const result = await fetchPostsWithAuthor();
+        const result = await fetchPostsWithAuthor(PAGE_SIZE, 0);
         setAllPosts(result);
-        setPosts(result); // Show all posts initially
+        setPosts(result);
+        setHasMore(result.length === PAGE_SIZE);
+        setSkip(0);
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
         setLoading(false);
       }
     };
-
     loadPosts();
   }, []);
+
+  // Scroll to bottom when new posts are appended
+  useEffect(() => {
+    if (skip > 0 && !loading) {
+      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+    }
+  }, [posts, loading, skip]);
 
   const handleSearch = async (term) => {
     setSearchTerm(term);
@@ -78,14 +91,34 @@ export default function ExplorePage() {
             <div className="search-results-header mb-3">
               <p className="text-muted">
                 {posts.length > 0
-                  ? `Found ${posts.length} result${
-                      posts.length !== 1 ? "s" : ""
-                    } for "${searchTerm}"`
+                  ? `Found ${posts.length} result${posts.length !== 1 ? "s" : ""} for "${searchTerm}"`
                   : `No results found for "${searchTerm}"`}
               </p>
             </div>
           )}
           <PostList posts={posts} />
+          {hasMore && (
+            <div className="text-center my-4">
+              <button
+                className="btn btn-primary px-4"
+                style={{ minWidth: '160px' }}
+                onClick={async () => {
+                  setLoading(true);
+                  const nextSkip = skip + PAGE_SIZE;
+                  const more = await fetchPostsWithAuthor(PAGE_SIZE, nextSkip);
+                  setAllPosts(prev => [...prev, ...more]);
+                  if (!searchTerm.trim()) {
+                    setPosts(prev => [...prev, ...more]);
+                  }
+                  setHasMore(more.length === PAGE_SIZE);
+                  setSkip(nextSkip);
+                  setLoading(false);
+                }}
+              >
+                Load more posts
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
