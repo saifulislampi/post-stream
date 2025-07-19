@@ -2,6 +2,7 @@ import Timeline from "../pages/Timeline";
 import PostPage from "../pages/PostPage";
 import ProfilePage from "../pages/ProfilePage";
 import ExplorePage from "../pages/ExplorePage";
+import HashtagPage from "../pages/HashtagPage";
 import AuthModule from "../components/auth/AuthModule";
 import AuthLogin from "../components/auth/AuthLogin";
 import AuthRegister from "../components/auth/AuthRegister";
@@ -38,6 +39,10 @@ export const protectedRoutes = [
   {
     path: "/profile/:profileId",
     component: ProfilePage,
+  },
+  {
+    path: "/hashtag/:tag",
+    component: HashtagPage,
   },
   {
     path: "/explore",
