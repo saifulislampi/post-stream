@@ -18,12 +18,16 @@ export default function Timeline({ onAdd, currentUser, currentProfile }) {
     if (!currentProfile) return;
     const loadFeed = async () => {
       setLoadingFeed(true);
+      
+      // Fetch both feed posts and user's own posts in a single query
       const posts = await fetchFeedPostsWithAuthor(currentProfile.id, PAGE_SIZE, skip);
+      
       if (skip === 0) {
         setFeedPosts(posts);
       } else {
         setFeedPosts(prev => [...prev, ...posts]);
       }
+      
       setHasMore(posts.length === PAGE_SIZE);
       setLoadingFeed(false);
     };
