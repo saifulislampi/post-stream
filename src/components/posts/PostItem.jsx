@@ -63,15 +63,15 @@ export default function PostItem({ post }) {
           
             {/* Post Body */}
             <div className="post-body mb-2">
-              <Link
+              {/* <Link
                 to={`/post/${post.id}`}
                 className="text-decoration-none text-dark"
-              >
+              > */}
                 <PostBodyWithHashtags
                   body={post.body}
                   hashtags={post.hashtags}
                 />
-              </Link>
+              {/* </Link> */}
             </div>
 
             {/* Post Image */}

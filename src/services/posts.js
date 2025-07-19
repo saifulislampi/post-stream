@@ -286,7 +286,7 @@ export const searchPosts = async (searchTerm, limit = 20) => {
 };
 
 /**
- * Fetch feed posts (posts by users the current profile follows) with author data
+ * Fetch feed posts (posts by users the current profile follows + own posts) with author data
  * Paginated: max `limit` per page, `skip` offset
  */
 export const fetchFeedPostsWithAuthor = async (
@@ -302,12 +302,19 @@ export const fetchFeedPostsWithAuthor = async (
     followQuery.limit(1000);
     const followObjs = await followQuery.find();
     const followingIds = followObjs.map(f => f.get("followingId"));
-    if (!followingIds.length) return [];
+    
+    // 2. Include the current user's own posts by adding their ID to the list
+    const allAuthorIds = [...followingIds, profileId];
+    
+    // If user follows no one, still show their own posts
+    if (allAuthorIds.length === 1) {
+      // Only showing own posts
+    }
 
-    // 2. Fetch posts by those users
+    // 3. Fetch posts by all these users (followings + self)
     const Post = Parse.Object.extend("Post");
     const query = new Parse.Query(Post);
-    query.containedIn("authorId", followingIds);
+    query.containedIn("authorId", allAuthorIds);
     query.descending("createdAt");
     query.limit(limit);
     query.skip(skip);
@@ -315,7 +322,7 @@ export const fetchFeedPostsWithAuthor = async (
     const posts = await query.find();
     const plains = posts.map(parsePostToPlain);
 
-    // 3. Attach author profiles
+    // 4. Attach author profiles
     const { fetchProfilesByIds } = await import("./profiles.js");
     // Gather IDs for authors and retweeters
     const authorIds = new Set();
