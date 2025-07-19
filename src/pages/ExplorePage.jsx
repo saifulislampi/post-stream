@@ -134,7 +134,7 @@ export default function ExplorePage() {
             <SearchAutocomplete
               searchTerm={searchTerm}
               onHashtagSelect={() => {}}
-              onUserSelect={(user) => navigate(`/profile/${user.username}`)}
+              onUserSelect={(user) => navigate(`/profile/${user.id}`)}
             />
           )}
         </div>

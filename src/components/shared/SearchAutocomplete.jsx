@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Spinner from "./Spinner.jsx";
+import Avatar from "./Avatar.jsx";
 import { searchHashtags } from "../../services/hashtags.js";
 import { searchProfiles } from "../../services/profiles.js";
 import "./SearchAutocomplete.css";
@@ -49,10 +50,18 @@ export default function SearchAutocomplete({ searchTerm, onHashtagSelect, onUser
             }}
           >
             {searchTerm.startsWith("#") ? `#${opt}` : (
-              <>
-                <img src={opt.avatar || ""} alt="avatar" className="avatar-sm" />
-                <span>{opt.username}</span>
-              </>
+              <div className="d-flex align-items-center">
+                <Avatar profile={opt} size={32} className="me-2" />
+                <div>
+                  <div className="fw-bold text-dark">
+                    {opt.firstName && opt.lastName 
+                      ? `${opt.firstName} ${opt.lastName}` 
+                      : opt.firstName || opt.lastName || "Unknown User"
+                    }
+                  </div>
+                  <div className="text-muted small">@{opt.username}</div>
+                </div>
+              </div>
             )}
           </div>
         ))

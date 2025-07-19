@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import PostList from "../posts/PostList";
+import Avatar from "./Avatar";
 import "./SearchResults.css";
 
 export default function SearchResults({ posts, users, hashtags, searchTerm }) {
@@ -16,22 +17,28 @@ export default function SearchResults({ posts, users, hashtags, searchTerm }) {
       {users && users.length > 0 && (
         <section className="mb-4">
           <h2 className="h5">Users</h2>
-          <ul className="list-group">
-            {users.map((u) => (
-              <li
-                key={u.id}
-                className="list-group-item d-flex align-items-center"
-                onClick={() => navigate(`/profile/${u.username}`)}
-                style={{ cursor: 'pointer' }}
-              >
-                {u.avatar && <img src={u.avatar} alt="avatar" className="avatar-sm me-2" />}
-                <div>
-                  <strong>@{u.username}</strong>
-                  <div className="text-muted small">{u.firstName} {u.lastName}</div>
+          <div className="d-flex flex-wrap gap-3">
+            {users.map((u) => {
+              const fullName = u.firstName && u.lastName 
+                ? `${u.firstName} ${u.lastName}` 
+                : u.firstName || u.lastName || "Unknown User";
+              
+              return (
+                <div
+                  key={u.id}
+                  className="user-thumbnail d-flex align-items-center p-3 border rounded bg-white"
+                  onClick={() => navigate(`/profile/${u.username}`)}
+                  style={{ cursor: 'pointer', minWidth: '200px', maxWidth: '300px' }}
+                >
+                  <Avatar profile={u} size={48} className="me-3" />
+                  <div className="flex-grow-1">
+                    <div className="fw-bold text-dark">{fullName}</div>
+                    <div className="text-muted small">@{u.username}</div>
+                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
         </section>
       )}
       {hashtags && hashtags.length > 0 && (
