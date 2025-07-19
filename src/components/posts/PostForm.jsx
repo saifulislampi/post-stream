@@ -20,16 +20,26 @@ export default function PostForm({ onAdd, currentUser, currentProfile }) {
     }
   };
 
+  function extractHashtags(text, max = 10) {
+  // Matches #word, ignores punctuation, case-insensitive
+  const matches = text.match(/#\w+/g);
+  if (!matches) return [];
+  // Remove # and lowercase for consistency
+  return matches.slice(0, max).map(tag => tag.replace('#', '').toLowerCase());
+}
+
   function submit(e) {
     e.preventDefault();
     // Allow posting if there's either text or an image
     if (!body.trim() && !uploadedImage) return;
+    const hashtags = extractHashtags(body, 10);
     onAdd({
       id: Date.now(),
       body,
-      tag: "general", // Default tag, we'll add hashtag parsing later
-      image: uploadedImage ? uploadedImage.originalFile.file : null, // Pass the actual File object
-      imageUrl: uploadedImage ? uploadedImage.fileUrl : null, // Pass the hosted URL
+      tag: "general",
+      hashtags, // Pass up to 10 hashtags
+      image: uploadedImage ? uploadedImage.originalFile.file : null,
+      imageUrl: uploadedImage ? uploadedImage.fileUrl : null,
     });
     setBody("");
     setUploadedImage(null);

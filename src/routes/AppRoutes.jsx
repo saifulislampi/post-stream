@@ -24,6 +24,7 @@ const AppRoutes = ({
       PostPage: { currentProfile },
       ProfilePage: { currentProfile },
       ExplorePage: { currentProfile },
+      HashtagPage: { currentProfile },
       AuthLogin: { onLogin },
     };
 

@@ -45,6 +45,7 @@ const parsePostToPlain = (p) => ({
   authorUsername: p.get("authorUsername"),
   body: p.get("body"),
   tag: p.get("tag"),
+  hashtags: p.get("hashtags") || [], // Ensure hashtags is always an array
   commentsCount: p.get("commentsCount") ?? 0,
   likesCount: p.get("likesCount") ?? 0,
   retweetsCount: p.get("retweetsCount") ?? 0,
@@ -206,6 +207,7 @@ export const createPost = async (postData, profile) => {
     post.set("authorUsername", username);
     post.set("body", postData.body);
     post.set("tag", postData.tag || "general");
+    post.set("hashtags", postData.hashtags || []); // Store up to 10 hashtags
     post.set("commentsCount", 0);
     post.set("likesCount", 0);
     post.set("retweetsCount", 0);

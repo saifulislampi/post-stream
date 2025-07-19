@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import PostActionBar from "./PostActionBar";
 import RetweetedPost from "./RetweetedPost";
+import PostBodyWithHashtags from "./PostBodyWithHashtags";
 import Avatar from "../shared/Avatar";
 
 function formatTimestamp(date) {
@@ -59,14 +60,17 @@ export default function PostItem({ post }) {
                 <span className="text-muted">{formattedTimestamp}</span>
               </Link>
             </div>
-
+          
             {/* Post Body */}
             <div className="post-body mb-2">
               <Link
                 to={`/post/${post.id}`}
                 className="text-decoration-none text-dark"
               >
-                {post.body}
+                <PostBodyWithHashtags
+                  body={post.body}
+                  hashtags={post.hashtags}
+                />
               </Link>
             </div>
 
@@ -74,9 +78,9 @@ export default function PostItem({ post }) {
             {post.imageUrl && (
               <div className="post-image-container mb-2">
                 <Link to={`/post/${post.id}`}>
-                  <img 
-                    src={post.imageUrl} 
-                    alt="Post attachment" 
+                  <img
+                    src={post.imageUrl}
+                    alt="Post attachment"
                     className="post-image"
                     loading="lazy"
                   />
