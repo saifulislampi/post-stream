@@ -8,35 +8,39 @@ import { fetchFeedPostsWithAuthor, createPost } from "../services/posts";
 // Note: No search input on homepage per requirements
 // Number of posts fetched per page; adjust as needed or move to config
 const PAGE_SIZE = 10;
-export default function Timeline({ currentUser, currentProfile }) {
+export default function Timeline({ currentUser, currentProfile, feedRefreshCount }) {
   const [feedPosts, setFeedPosts] = useState([]);
   const [loadingFeed, setLoadingFeed] = useState(true);
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 
+  // Reload feed when profile, pagination, or external refresh trigger changes
   useEffect(() => {
     if (!currentProfile) return;
     const loadFeed = async () => {
       setLoadingFeed(true);
-
-      // Fetch both feed posts and user's own posts in a single query
       const posts = await fetchFeedPostsWithAuthor(
         currentProfile.id,
         PAGE_SIZE,
         skip
       );
-
       if (skip === 0) {
         setFeedPosts(posts);
       } else {
         setFeedPosts((prev) => [...prev, ...posts]);
       }
-
       setHasMore(posts.length === PAGE_SIZE);
       setLoadingFeed(false);
     };
     loadFeed();
-  }, [currentProfile, skip]);
+  }, [currentProfile, skip, feedRefreshCount]);
+
+  // Reset pagination when feed refresh is triggered
+  useEffect(() => {
+    if (feedRefreshCount > 0) {
+      setSkip(0);
+    }
+  }, [feedRefreshCount]);
 
   const handleLoadMore = () => setSkip((prev) => prev + PAGE_SIZE);
 

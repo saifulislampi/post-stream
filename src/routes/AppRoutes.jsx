@@ -6,16 +6,16 @@ import ProtectedRoute from "./ProtectedRoute";
 import UnauthenticatedRoute from "./UnauthenticatedRoute";
 import { publicRoutes, protectedRoutes, specialRoutes } from "./routeConfig";
 
-const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin }) => {
+const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUpdate, feedRefreshCount }) => {
   // Props mapping function to dynamically assign props to components
   const getPropsForComponent = (component) => {
     const componentName = component.name;
 
     // Common props by component type
     const propsByComponent = {
-      Timeline: { currentUser, currentProfile },
+      Timeline: { currentUser, currentProfile, feedRefreshCount },
       PostPage: { currentProfile },
-      ProfilePage: { currentProfile },
+      ProfilePage: { currentProfile, onProfileUpdate },
       ExplorePage: { currentProfile },
       HashtagPage: { currentProfile },
       AuthLogin: { onLogin },

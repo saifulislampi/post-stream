@@ -10,6 +10,8 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  // Counter to trigger feed refresh in Timeline after profile updates
+  const [feedRefreshCount, setFeedRefreshCount] = useState(0);
 
   useEffect(() => {
     // On initial mount, check if user is already logged in
@@ -75,6 +77,13 @@ export default function App() {
     }
   };
 
+  // Handler for profile updates (e.g., follow/unfollow)
+  const handleProfileUpdate = (updatedProfile) => {
+    setCurrentProfile(updatedProfile);
+    // trigger Timeline to refresh feed
+    setFeedRefreshCount((prev) => prev + 1);
+  };
+
   if (loading) return <Spinner />;
 
   return (
@@ -84,6 +93,8 @@ export default function App() {
         currentProfile={currentProfile}
         onLogout={handleLogout}
         onLogin={handleLogin}
+        onProfileUpdate={handleProfileUpdate}
+        feedRefreshCount={feedRefreshCount}
       />
     </div>
   );
