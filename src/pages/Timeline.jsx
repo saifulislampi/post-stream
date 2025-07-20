@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import PostForm from "../components/posts/PostForm";
 import PostList from "../components/posts/PostList";
 import Spinner from "../components/shared/Spinner";
-import { fetchFeedPostsWithAuthor } from "../services/posts";
+import { fetchFeedPostsWithAuthor, createPost } from "../services/posts";
 
 // Note: No search input on homepage per requirements
 // Number of posts fetched per page; adjust as needed or move to config
@@ -18,41 +18,74 @@ export default function Timeline({ onAdd, currentUser, currentProfile }) {
     if (!currentProfile) return;
     const loadFeed = async () => {
       setLoadingFeed(true);
-      
+
       // Fetch both feed posts and user's own posts in a single query
-      const posts = await fetchFeedPostsWithAuthor(currentProfile.id, PAGE_SIZE, skip);
-      
+      const posts = await fetchFeedPostsWithAuthor(
+        currentProfile.id,
+        PAGE_SIZE,
+        skip
+      );
+
       if (skip === 0) {
         setFeedPosts(posts);
       } else {
-        setFeedPosts(prev => [...prev, ...posts]);
+        setFeedPosts((prev) => [...prev, ...posts]);
       }
-      
+
       setHasMore(posts.length === PAGE_SIZE);
       setLoadingFeed(false);
     };
     loadFeed();
   }, [currentProfile, skip]);
 
-  const handleLoadMore = () => setSkip(prev => prev + PAGE_SIZE);
+  const handleLoadMore = () => setSkip((prev) => prev + PAGE_SIZE);
 
   // Scroll to bottom when new posts are appended
   useEffect(() => {
     if (skip > 0 && !loadingFeed) {
-      window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
     }
   }, [feedPosts, loadingFeed, skip]);
 
+  // Handler to add a new post
+  const handleAddPost = async (raw) => {
+    if (!currentProfile) return;
+
+    try {
+      const saved = await createPost(
+        { ...raw, tag: raw.tag || "general" },
+        currentProfile
+      );
+
+      const postWithAuthor = {
+        ...saved,
+        author: currentProfile,
+      };
+
+      setFeedPosts([postWithAuthor, ...(feedPosts ?? [])]);
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
+  };
+
   return (
     <div className="container-main">
-      <PostForm onAdd={onAdd} currentUser={currentUser} currentProfile={currentProfile} />
+      <PostForm
+        onAdd={handleAddPost}
+        currentUser={currentUser}
+        currentProfile={currentProfile}
+      />
 
       {/* Feed Section */}
       {currentProfile && currentProfile.followingCount === 0 ? (
         <div className="text-center mt-5">
           <p>You are not currently following anyone.</p>
           <p>
-            Follow some users or <Link to="/explore">explore</Link> trending posts.
+            Follow some users or <Link to="/explore">explore</Link> trending
+            posts.
           </p>
         </div>
       ) : loadingFeed ? (
@@ -64,7 +97,7 @@ export default function Timeline({ onAdd, currentUser, currentProfile }) {
             <div className="text-center my-4">
               <button
                 className="btn btn-primary px-4"
-                style={{ minWidth: '160px' }}
+                style={{ minWidth: "160px" }}
                 onClick={handleLoadMore}
               >
                 Load more posts

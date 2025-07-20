@@ -55,27 +55,6 @@ export default function App() {
     }
   }, [currentUser]);
 
-  // Handler to add a new post
-  const handleAddPost = async (raw) => {
-    if (!currentProfile) return;
-
-    try {
-      const saved = await createPost(
-        { ...raw, tag: raw.tag || "general" },
-        currentProfile
-      );
-
-      const postWithAuthor = {
-        ...saved,
-        author: currentProfile,
-      };
-
-      setPosts([postWithAuthor, ...(posts ?? [])]);
-    } catch (error) {
-      console.error("Error creating post:", error);
-    }
-  };
-
   // Handler for logout
   const handleLogout = async () => {
     try {
@@ -111,7 +90,6 @@ export default function App() {
         currentProfile={currentProfile}
         onLogout={handleLogout}
         onLogin={handleLogin}
-        onAddPost={handleAddPost}
         posts={posts}
       />
     </div>

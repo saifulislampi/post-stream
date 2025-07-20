@@ -11,7 +11,6 @@ const AppRoutes = ({
   currentProfile,
   onLogout,
   onLogin,
-  onAddPost,
   posts,
 }) => {
   // Props mapping function to dynamically assign props to components
@@ -20,7 +19,7 @@ const AppRoutes = ({
 
     // Common props by component type
     const propsByComponent = {
-      Timeline: { posts, onAdd: onAddPost, currentUser, currentProfile },
+      Timeline: { posts, currentUser, currentProfile },
       PostPage: { currentProfile },
       ProfilePage: { currentProfile },
       ExplorePage: { currentProfile },
