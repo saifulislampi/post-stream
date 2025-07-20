@@ -10,25 +10,34 @@ export default function SearchAutocomplete({ searchTerm, onHashtagSelect, onUser
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
+    const { signal } = controller;
     const load = async () => {
-      if (!searchTerm) return setOptions([]);
-      setLoading(true);
-      if (searchTerm.startsWith("#")) {
-        const prefix = searchTerm.slice(1);
-        const tags = await searchHashtags(prefix, 10);
-        if (active) setOptions(tags.map(t => t.name));
-      } else if (searchTerm.startsWith("@")) {
-        const prefix = searchTerm.slice(1);
-        const users = await searchProfiles(prefix);
-        if (active) setOptions(users);
-      } else {
-        if (active) setOptions([]);
+      if (!searchTerm) {
+        setOptions([]);
+        return;
       }
-      setLoading(false);
+      setLoading(true);
+      try {
+        if (searchTerm.startsWith("#")) {
+          const prefix = searchTerm.slice(1);
+          const tags = await searchHashtags(prefix, 10);
+          if (!signal.aborted) setOptions(tags.map(t => t.name));
+        } else if (searchTerm.startsWith("@")) {
+          const prefix = searchTerm.slice(1);
+          const users = await searchProfiles(prefix);
+          if (!signal.aborted) setOptions(users);
+        } else {
+          setOptions([]);
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') console.error(err);
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
     };
     load();
-    return () => { active = false; };
+    return () => controller.abort();
   }, [searchTerm]);
 
   if (!searchTerm.startsWith("#") && !searchTerm.startsWith("@")) return null;
