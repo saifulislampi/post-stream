@@ -13,8 +13,10 @@ export default function SearchAutocomplete({ searchTerm, onHashtagSelect, onUser
     const controller = new AbortController();
     const { signal } = controller;
     const load = async () => {
-      if (!searchTerm) {
+      // Do not fetch when only prefix symbol is present
+      if (!searchTerm || searchTerm === "#" || searchTerm === "@") {
         setOptions([]);
+        setLoading(false);
         return;
       }
       setLoading(true);
