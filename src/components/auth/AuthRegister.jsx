@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "./AuthService";
+import { register, logout } from "./AuthService";
 
 const AuthRegister = () => {
   const [newUser, setNewUser] = useState({
@@ -25,7 +25,9 @@ const AuthRegister = () => {
     setLoading(true);
 
     try {
+      // Create account, then immediately logout so user returns to auth screen
       await register(newUser);
+      await logout();
       navigate("/auth", {
         state: { registered: true },
       });
