@@ -8,7 +8,7 @@ import { fetchFeedPostsWithAuthor, createPost } from "../services/posts";
 // Note: No search input on homepage per requirements
 // Number of posts fetched per page; adjust as needed or move to config
 const PAGE_SIZE = 10;
-export default function Timeline({ onAdd, currentUser, currentProfile }) {
+export default function Timeline({ currentUser, currentProfile }) {
   const [feedPosts, setFeedPosts] = useState([]);
   const [loadingFeed, setLoadingFeed] = useState(true);
   const [skip, setSkip] = useState(0);

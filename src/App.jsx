@@ -2,44 +2,39 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "./components/shared/Spinner";
 import AppRoutes from "./routes/AppRoutes";
-import { fetchPostsWithAuthor, createPost } from "./services/posts";
-import { getCurrentUser, logout, login } from "./components/auth/AuthService";
 import { fetchProfileByUserId } from "./services/profiles";
+import { getCurrentUser, logout, login } from "./components/auth/AuthService";
 
 export default function App() {
   const navigate = useNavigate();
-  const [posts, setPosts] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentProfile, setCurrentProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Only fetch profile and posts when currentUser changes and is not null
-    const fetchProfileAndPosts = async () => {
+    // On initial mount, check if user is already logged in
+    const fetchProfile = async () => {
       setLoading(true);
       try {
-        if (currentUser) {
-          const profile = await fetchProfileByUserId(currentUser.id);
+        const user = getCurrentUser();
+        if (user) {
+          setCurrentUser(user);
+          const profile = await fetchProfileByUserId(user.id);
           setCurrentProfile(profile);
-
-          const postsData = await fetchPostsWithAuthor();
-          setPosts(postsData);
         }
       } catch (error) {
-        console.error("Error fetching profile and posts:", error);
+        console.error("Error fetching profile:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    // On initial mount, check if user is already logged in
     const checkLoggedInUser = async () => {
       setLoading(true);
       try {
         const user = getCurrentUser();
         if (user) {
           setCurrentUser(user);
-          // Don't fetch profile/posts here - that will happen in the fetchProfileAndPosts effect
         }
       } catch (error) {
         console.error("Error checking logged in user:", error);
@@ -49,7 +44,7 @@ export default function App() {
     };
 
     if (currentUser) {
-      fetchProfileAndPosts();
+      fetchProfile();
     } else {
       checkLoggedInUser();
     }
@@ -61,7 +56,6 @@ export default function App() {
       await logout();
       setCurrentUser(null);
       setCurrentProfile(null);
-      setPosts(null);
       navigate("/auth");
     } catch (error) {
       console.error("Error logging out:", error);
@@ -90,7 +84,6 @@ export default function App() {
         currentProfile={currentProfile}
         onLogout={handleLogout}
         onLogin={handleLogin}
-        posts={posts}
       />
     </div>
   );
