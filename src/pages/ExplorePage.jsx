@@ -22,6 +22,8 @@ export default function ExplorePage() {
   const [searching, setSearching] = useState(false);
   const [searchResults, setSearchResults] = useState({ posts: [], users: [], hashtags: [] });
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  // Delay before hiding autocomplete dropdown (ms)
+  const AUTOCOMPLETE_HIDE_DELAY_MS = 200;
   const [skip, setSkip] = useState(0);
   const [hasMore, setHasMore] = useState(false);
 
@@ -121,7 +123,7 @@ export default function ExplorePage() {
             onSearch={handleSearch}
             placeholder="Search posts, users, or hashtags..."
             onFocus={() => setShowAutocomplete(true)}
-            onBlur={() => setTimeout(() => setShowAutocomplete(false), 200)}
+            onBlur={() => setTimeout(() => setShowAutocomplete(false), AUTOCOMPLETE_HIDE_DELAY_MS)}
           />
           {showAutocomplete && searchTerm.startsWith("#") && (
             <SearchAutocomplete
@@ -141,7 +143,9 @@ export default function ExplorePage() {
       </div>
 
       {searchTerm && searching ? (
-        <div className="text-center py-4">Spinner Place Holder</div>
+        <div className="text-center py-4">
+          <Spinner />
+        </div>
       ) : searchTerm && !searchTerm.startsWith("#") && !searchTerm.startsWith("@") && searchTerm.trim().length >= 3 ? (
         <SearchResults
           posts={searchResults.posts}

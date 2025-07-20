@@ -12,10 +12,13 @@ if (!Parse.applicationId) {
  */
 export const searchHashtags = async (prefix, limit = 10) => {
   try {
+    // Escape prefix to prevent regex injection
+    const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const Post = Parse.Object.extend("Post");
     const query = new Parse.Query(Post);
     // Only fetch posts where at least one hashtag matches the prefix (server-side)
-    query.matches("hashtags", new RegExp(`^${prefix}`, "i"));
+    const safe = escapeRegex(prefix);
+    query.matches("hashtags", new RegExp(`^${safe}`, "i"));
     query.limit(limit);
     const posts = await query.find();
     const counts = new Map();

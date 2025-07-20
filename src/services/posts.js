@@ -305,11 +305,6 @@ export const fetchFeedPostsWithAuthor = async (
     
     // 2. Include the current user's own posts by adding their ID to the list
     const allAuthorIds = [...followingIds, profileId];
-    
-    // If user follows no one, still show their own posts
-    if (allAuthorIds.length === 1) {
-      // Only showing own posts
-    }
 
     // 3. Fetch posts by all these users (followings + self)
     const Post = Parse.Object.extend("Post");
