@@ -2,12 +2,7 @@
  * Seed script for Parse/Back4App with User and Profile architecture
  */
 const Parse = require("parse/node");
-
-// Back4App configuration
-const APPLICATION_ID = "3gMH4Kq9ALoTgvRaYN0STLZPBRBrw6HzlIqytZzf";
-const JAVASCRIPT_KEY = "V1OcAlaeBrZwruPBmMjT2d0nIZ1r5rSI7ONSSPKN";
-const MASTER_KEY = "neaO4TBGd5NKjtuDRjEt7Sqazr32LmyLYp06A9Wg";
-const SERVER_URL = "https://parseapi.back4app.com/";
+const { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL, MASTER_KEY } = require("../environments.js");
 
 // Initialize Parse with master key for seeding
 Parse.initialize(APPLICATION_ID, JAVASCRIPT_KEY, MASTER_KEY);
