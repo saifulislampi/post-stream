@@ -1,0 +1,151 @@
+@startuml PostStreamFeature6Database
+!define RECTANGLE class
+
+skinparam class {
+    BackgroundColor LightBlue
+    BorderColor DarkBlue
+    FontColor Black
+    FontSize 12
+}
+
+skinparam arrow {
+    Color DarkBlue
+    FontColor DarkBlue
+}
+
+' Parse Authentication System
+class ParseUser {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +username : String
+    +email : String
+    +password : String (hashed)
+    --
+    +requestPasswordReset() : void
+    +resetPassword() : void
+}
+
+' User Profile System
+class Profile {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +userId : String (ParseUser ref)
+    +username : String
+    +firstName : String
+    +lastName : String
+    +bio : String
+    +email : String
+    +avatar : String (image URL)
+    +coverImage : String
+    +followersCount : Number
+    +followingCount : Number
+    +postsCount : Number
+}
+
+' Enhanced Post System
+class Post {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +authorId : String (Profile ref)
+    +authorUsername : String
+    +body : String
+    +tag : String
+    +image : File (Parse File)
+    +imageUrl : String
+    +likesCount : Number
+    +commentsCount : Number
+    +retweetsCount : Number
+    --
+    ' Retweet fields
+    +isRetweet : Boolean
+    +originalPostId : String
+    +originalPost : Pointer<Post>
+    +retweetedBy : String (Profile ref)
+    +retweetedByUsername : String
+}
+
+' Comment System
+class Comment {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +postId : String (Post ref)
+    +authorId : String (Profile ref)
+    +authorUsername : String
+    +body : String
+}
+
+' Like System
+class Like {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +postId : String (Post ref)
+    +userId : String (ParseUser ref)
+    +username : String
+}
+
+' Retweet System
+class Retweet {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +postId : String (Post ref)
+    +userId : String (ParseUser ref)
+    +username : String
+}
+
+' Follow System
+class Follow {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +followerId : String (Profile ref)
+    +followingId : String (Profile ref)
+    +followerUsername : String
+    +followingUsername : String
+}
+
+' Core Relationships
+ParseUser ||--|| Profile : "has profile"
+Profile ||--o{ Post : "creates"
+Profile ||--o{ Comment : "writes"
+Post ||--o{ Comment : "receives"
+
+' Interaction Relationships
+ParseUser ||--o{ Like : "likes posts"
+Post ||--o{ Like : "receives likes"
+
+ParseUser ||--o{ Retweet : "retweets posts"
+Post ||--o{ Retweet : "gets retweeted"
+
+' Retweet Post Relationships
+Post ||--o{ Post : "original post"
+
+' Follow Relationships  
+Profile ||--o{ Follow : "follows others"
+Profile ||--o{ Follow : "followed by"
+
+' Relationship labels with cardinalities
+Profile }o--|| ParseUser : authenticates
+Post }o--|| Profile : authored_by
+Comment }o--|| Profile : written_by
+Comment }o--|| Post : belongs_to
+Like }o--|| ParseUser : liked_by
+Like }o--|| Post : liked_post
+Retweet }o--|| ParseUser : retweeted_by
+Retweet }o--|| Post : retweeted_post
+Follow }o--|| Profile : follower
+Follow }o--|| Profile : following
+
+@enduml
