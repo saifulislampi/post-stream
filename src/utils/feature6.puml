@@ -1,4 +1,4 @@
-@startuml PostStreamFeature6Database
+@startuml PostStream_F6_UML
 !define RECTANGLE class
 
 skinparam class {

@@ -1,4 +1,4 @@
-@startuml PostStreamDatabase
+@startuml PostStream_F4_UML
 !define RECTANGLE class
 
 skinparam class {

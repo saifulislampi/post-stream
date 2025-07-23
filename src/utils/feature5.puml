@@ -1,0 +1,69 @@
+@startuml PostStream_F5_UML
+!define RECTANGLE class
+
+skinparam class {
+    BackgroundColor LightGreen
+    BorderColor DarkGreen
+    FontColor Black
+    FontSize 12
+}
+
+skinparam arrow {
+    Color DarkGreen
+    FontColor DarkGreen
+}
+
+class User {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +username : String
+    +email : String
+    +password : String
+    +sessionToken : String
+    +emailVerified : Boolean
+}
+
+class Profile {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +userId : String
+    +username : String
+    +firstName : String
+    +lastName : String
+    +bio : String
+    +email : String
+    +followersCount : Number
+    +followingCount : Number
+    +postsCount : Number
+}
+
+class Post {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +authorId : String
+    +authorUsername : String
+    +body : String
+    +tag : String
+    +likesCount : Number
+    +commentsCount : Number
+}
+
+' Relationships
+User ||--|| Profile : "has profile"
+Profile ||--o{ Post : "creates"
+
+' Relationship labels
+Profile }o--|| User : belongs to
+Post }o--|| Profile : authored by
+
+note right of User : Parse.User built-in class\nHandles authentication\nStores credentials and session
+note bottom of Profile : User profile information\nDisplay data and statistics\nLinked to Parse.User
+note left of Post : User-generated content\nWith tags and engagement metrics\nLinked to author profile
+
+@enduml
