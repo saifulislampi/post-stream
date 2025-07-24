@@ -34,10 +34,23 @@ class Post {
     +imageName : String
 }
 
+class Comment {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +postId : String
+    +userId : String
+    +body : String
+}
+
 ' Relationships
 AppUser ||--o{ Post : "creates"
+AppUser ||--o{ Comment : "writes"
+Post ||--o{ Comment : "has"
 
 note right of AppUser : User profile information\nfor post authors
 note left of Post : Post contents \nwith tags and optional images
+note bottom of Comment : User responses\nto posts
 
 @enduml
