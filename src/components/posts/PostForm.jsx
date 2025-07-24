@@ -45,6 +45,9 @@ export default function PostForm({ onAdd, currentUser, currentProfile }) {
     });
     setBody("");
     setUploadedImage(null);
+    // Notify listeners of new post
+    console.log("Post submitted:", { body, hashtags });
+    window.dispatchEvent(new Event('postCreated'));
   }
 
   // Handle image upload completion
