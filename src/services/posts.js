@@ -4,6 +4,7 @@
 
 import Parse from "parse";
 import { APPLICATION_ID, JAVASCRIPT_KEY, SERVER_URL } from "../environments.js";
+import { fetchProfilesByIds } from "./profiles.js";
 
 // Initialize Parse
 if (!Parse.applicationId) {
@@ -295,6 +296,8 @@ export const fetchFeedPostsWithAuthor = async (
   skip = 0
 ) => {
   try {
+    console.log('fetchFeedPostsWithAuthor: Starting fetch for profileId:', profileId, 'limit:', limit, 'skip:', skip);
+    
     // 1. Get list of followings
     const Follow = Parse.Object.extend("Follow");
     const followQuery = new Parse.Query(Follow);
@@ -302,9 +305,11 @@ export const fetchFeedPostsWithAuthor = async (
     followQuery.limit(1000);
     const followObjs = await followQuery.find();
     const followingIds = followObjs.map(f => f.get("followingId"));
+    console.log('fetchFeedPostsWithAuthor: Found followingIds:', followingIds.length);
     
     // 2. Include the current user's own posts by adding their ID to the list
     const allAuthorIds = [...followingIds, profileId];
+    console.log('fetchFeedPostsWithAuthor: allAuthorIds:', allAuthorIds.length);
 
     // 3. Fetch posts by all these users (followings + self)
     const Post = Parse.Object.extend("Post");
@@ -315,10 +320,10 @@ export const fetchFeedPostsWithAuthor = async (
     query.skip(skip);
     query.include("originalPost");
     const posts = await query.find();
+    console.log('fetchFeedPostsWithAuthor: Found posts:', posts.length);
     const plains = posts.map(parsePostToPlain);
 
     // 4. Attach author profiles
-    const { fetchProfilesByIds } = await import("./profiles.js");
     // Gather IDs for authors and retweeters
     const authorIds = new Set();
     const retweeterIds = new Set();
@@ -331,8 +336,10 @@ export const fetchFeedPostsWithAuthor = async (
       }
     });
     const allIds = Array.from(new Set([...authorIds, ...retweeterIds]));
+    console.log('fetchFeedPostsWithAuthor: Fetching profiles for IDs:', allIds.length);
     const profiles = await fetchProfilesByIds(allIds);
     const profileMap = new Map(profiles.map(pr => [pr.id, pr]));
+    console.log('fetchFeedPostsWithAuthor: Profile map created, returning posts:', plains.length);
 
     return plains.map(p => {
       if (p.isRetweet && p.originalPost) {
@@ -349,6 +356,7 @@ export const fetchFeedPostsWithAuthor = async (
     });
   } catch (error) {
     console.error("Error fetching feed posts:", error);
+    console.error("Error details:", error.message, error.stack);
     return [];
   }
 };

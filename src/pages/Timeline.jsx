@@ -19,19 +19,27 @@ export default function Timeline({ currentUser, currentProfile, feedRefreshCount
     if (!currentProfile) return;
     console.log('Timeline: Loading feed, followingCount:', currentProfile.followingCount, 'feedRefreshCount:', feedRefreshCount);
     const loadFeed = async () => {
-      setLoadingFeed(true);
-      const posts = await fetchFeedPostsWithAuthor(
-        currentProfile.id,
-        PAGE_SIZE,
-        skip
-      );
-      if (skip === 0) {
-        setFeedPosts(posts);
-      } else {
-        setFeedPosts((prev) => [...prev, ...posts]);
+      try {
+        setLoadingFeed(true);
+        const posts = await fetchFeedPostsWithAuthor(
+          currentProfile.id,
+          PAGE_SIZE,
+          skip
+        );
+        console.log('Timeline: Received posts:', posts.length);
+        if (skip === 0) {
+          setFeedPosts(posts);
+        } else {
+          setFeedPosts((prev) => [...prev, ...posts]);
+        }
+        setHasMore(posts.length === PAGE_SIZE);
+      } catch (error) {
+        console.error('Timeline: Error loading feed:', error);
+        setFeedPosts([]);
+        setHasMore(false);
+      } finally {
+        setLoadingFeed(false);
       }
-      setHasMore(posts.length === PAGE_SIZE);
-      setLoadingFeed(false);
     };
     loadFeed();
   }, [currentProfile, skip, feedRefreshCount]);
