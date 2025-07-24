@@ -58,12 +58,8 @@ class Post {
 User ||--|| Profile : "has profile"
 Profile ||--o{ Post : "creates"
 
-' Relationship labels
-Profile }o--|| User : belongs to
-Post }o--|| Profile : authored by
-
-note right of User : Parse.User built-in class\nHandles authentication\nStores credentials and session
-note bottom of Profile : User profile information\nDisplay data and statistics\nLinked to Parse.User
-note left of Post : User-generated content\nWith tags and engagement metrics\nLinked to author profile
+note bottom of User : Parse.User built-in class\nFor handling authentication\nStoring credentials and session
+note bottom of Profile : User profile information\nLinked to Parse.User
+note top of Post : User-generated posts\nLinked to author profile
 
 @enduml
