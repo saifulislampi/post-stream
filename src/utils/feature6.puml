@@ -2,8 +2,8 @@
 !define RECTANGLE class
 
 skinparam class {
-    BackgroundColor LightBlue
-    BorderColor DarkBlue
+    BackgroundColor LightGreen
+    BorderColor DarkGreen
     FontColor Black
     FontSize 12
 }
@@ -13,7 +13,8 @@ skinparam arrow {
     FontColor DarkBlue
 }
 
-' Parse Authentication System
+' Compact 3x3 layout arrangement
+' Row 1: Authentication and Core
 class ParseUser {
     +objectId : String
     +createdAt : Date
@@ -27,7 +28,6 @@ class ParseUser {
     +resetPassword() : void
 }
 
-' User Profile System
 class Profile {
     +objectId : String
     +createdAt : Date
@@ -46,7 +46,6 @@ class Profile {
     +postsCount : Number
 }
 
-' Enhanced Post System
 class Post {
     +objectId : String
     +createdAt : Date
@@ -56,33 +55,15 @@ class Post {
     +authorUsername : String
     +body : String
     +tag : String
-    +image : File (Parse File)
+    +imageName : String
     +imageUrl : String
     +likesCount : Number
     +commentsCount : Number
     +retweetsCount : Number
-    --
-    ' Retweet fields
-    +isRetweet : Boolean
     +originalPostId : String
-    +originalPost : Pointer<Post>
-    +retweetedBy : String (Profile ref)
-    +retweetedByUsername : String
 }
 
-' Comment System
-class Comment {
-    +objectId : String
-    +createdAt : Date
-    +updatedAt : Date
-    --
-    +postId : String (Post ref)
-    +authorId : String (Profile ref)
-    +authorUsername : String
-    +body : String
-}
-
-' Like System
+' Row 2: Interactions
 class Like {
     +objectId : String
     +createdAt : Date
@@ -93,8 +74,18 @@ class Like {
     +username : String
 }
 
-' Retweet System
 class Retweet {
+    +objectId : String
+    +createdAt : Date
+    +updatedAt : Date
+    --
+    +postId : String (Post ref)
+    +userId : String (ParseUser ref)
+    +username : String
+    +originalPostId : String
+}
+
+class Comment {
     +objectId : String
     +createdAt : Date
     +updatedAt : Date
@@ -104,7 +95,7 @@ class Retweet {
     +username : String
 }
 
-' Follow System
+' Row 3: Social Features
 class Follow {
     +objectId : String
     +createdAt : Date
@@ -115,6 +106,16 @@ class Follow {
     +followerUsername : String
     +followingUsername : String
 }
+
+' Layout positioning for 3x3 grid
+ParseUser -[hidden]right- Profile
+Profile -[hidden]right- Post
+Like -[hidden]right- Retweet
+Retweet -[hidden]right- Comment
+ParseUser -[hidden]down- Like
+Profile -[hidden]down- Retweet
+Post -[hidden]down- Comment
+Like -[hidden]down- Follow
 
 ' Core Relationships
 ParseUser ||--|| Profile : "has profile"

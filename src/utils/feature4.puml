@@ -2,8 +2,8 @@
 !define RECTANGLE class
 
 skinparam class {
-    BackgroundColor LightBlue
-    BorderColor DarkBlue
+    BackgroundColor LightGreen
+    BorderColor DarkGreen
     FontColor Black
     FontSize 12
 }
