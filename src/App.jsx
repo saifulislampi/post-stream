@@ -79,6 +79,7 @@ export default function App() {
 
   // Handler for profile updates (e.g., follow/unfollow)
   const handleProfileUpdate = (updatedProfile) => {
+    console.log('App: Updating profile, new followingCount:', updatedProfile.followingCount);
     setCurrentProfile(updatedProfile);
     // trigger Timeline to refresh feed
     setFeedRefreshCount((prev) => prev + 1);

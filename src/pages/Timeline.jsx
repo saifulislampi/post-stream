@@ -17,6 +17,7 @@ export default function Timeline({ currentUser, currentProfile, feedRefreshCount
   // Reload feed when profile, pagination, or external refresh trigger changes
   useEffect(() => {
     if (!currentProfile) return;
+    console.log('Timeline: Loading feed, followingCount:', currentProfile.followingCount, 'feedRefreshCount:', feedRefreshCount);
     const loadFeed = async () => {
       setLoadingFeed(true);
       const posts = await fetchFeedPostsWithAuthor(
@@ -35,7 +36,7 @@ export default function Timeline({ currentUser, currentProfile, feedRefreshCount
     loadFeed();
   }, [currentProfile, skip, feedRefreshCount]);
 
-  // Reset pagination when feed refresh is triggered
+  // Reset pagination when feed refresh is triggered or following count changes
   useEffect(() => {
     if (feedRefreshCount > 0) {
       setSkip(0);
@@ -84,7 +85,9 @@ export default function Timeline({ currentUser, currentProfile, feedRefreshCount
       />
 
       {/* Feed Section */}
-      {currentProfile && currentProfile.followingCount === 0 ? (
+      {loadingFeed ? (
+        <Spinner />
+      ) : currentProfile && currentProfile.followingCount === 0 ? (
         <div className="text-center mt-5">
           <p>You are not currently following anyone.</p>
           <p>
@@ -92,8 +95,6 @@ export default function Timeline({ currentUser, currentProfile, feedRefreshCount
             posts.
           </p>
         </div>
-      ) : loadingFeed ? (
-        <Spinner />
       ) : (
         <>
           <PostList posts={feedPosts} />

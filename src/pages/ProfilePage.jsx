@@ -26,7 +26,7 @@ function getInitials(profile) {
   return "?";
 }
 
-export default function ProfilePage() {
+export default function ProfilePage({ onProfileUpdate }) {
   const { profileId } = useParams(); // Changed from userId to profileId
   const navigate = useNavigate();
 
@@ -134,6 +134,17 @@ export default function ProfilePage() {
           ...prev,
           followersCount: Math.max(0, (prev.followersCount || 0) - 1),
         }));
+        
+        // Update the current user's following count and notify parent
+        const updatedCurrentProfile = {
+          ...currentProfile,
+          followingCount: Math.max(0, (currentProfile.followingCount || 0) - 1),
+        };
+        setCurrentProfile(updatedCurrentProfile);
+        if (onProfileUpdate) {
+          console.log('ProfilePage: Calling onProfileUpdate after unfollow, new followingCount:', updatedCurrentProfile.followingCount);
+          onProfileUpdate(updatedCurrentProfile);
+        }
       } else {
         await followProfile(currentProfile, profile);
         setIsFollowingUser(true);
@@ -141,6 +152,17 @@ export default function ProfilePage() {
           ...prev,
           followersCount: (prev.followersCount || 0) + 1,
         }));
+        
+        // Update the current user's following count and notify parent
+        const updatedCurrentProfile = {
+          ...currentProfile,
+          followingCount: (currentProfile.followingCount || 0) + 1,
+        };
+        setCurrentProfile(updatedCurrentProfile);
+        if (onProfileUpdate) {
+          console.log('ProfilePage: Calling onProfileUpdate after follow, new followingCount:', updatedCurrentProfile.followingCount);
+          onProfileUpdate(updatedCurrentProfile);
+        }
       }
     } catch (err) {
       console.error("Follow action failed:", err);

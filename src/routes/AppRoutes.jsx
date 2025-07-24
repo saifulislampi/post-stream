@@ -16,8 +16,8 @@ const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUp
       Timeline: { currentUser, currentProfile, feedRefreshCount },
       PostPage: { currentProfile },
       ProfilePage: { currentProfile, onProfileUpdate },
-      ExplorePage: { currentProfile },
-      HashtagPage: { currentProfile },
+      ExplorePage: { currentProfile, onProfileUpdate },
+      HashtagPage: { currentProfile, onProfileUpdate },
       AuthLogin: { onLogin },
     };
 
@@ -68,7 +68,11 @@ const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUp
             <Route
               key={route.path}
               path={route.path}
-              element={<Component {...componentProps} />}
+              element={
+                route.component.name === 'Timeline' ?
+                  <Component key={componentProps.feedRefreshCount} {...componentProps} /> :
+                  <Component {...componentProps} />
+              }
             />
           );
         })}
