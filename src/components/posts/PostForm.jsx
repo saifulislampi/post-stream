@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { UploadButton } from "@bytescale/upload-widget-react";
 import Avatar from "../shared/Avatar";
+import Picker from 'emoji-picker-react';
 
 export default function PostForm({ onAdd, currentUser, currentProfile }) {
   const [body, setBody] = useState("");
   const [uploadedImage, setUploadedImage] = useState(null);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   // Upload widget options
   const uploadOptions = {
@@ -55,6 +57,12 @@ export default function PostForm({ onAdd, currentUser, currentProfile }) {
   // Handle image removal
   const handleImageRemove = () => {
     setUploadedImage(null);
+  };
+
+  // Handle emoji selection
+  const onEmojiClick = (emojiData, event) => {
+    setBody(prev => prev + emojiData.emoji);
+    setShowEmojiPicker(false);
   };
 
   const charLimit = 280;
@@ -117,9 +125,15 @@ export default function PostForm({ onAdd, currentUser, currentProfile }) {
               type="button"
               className="action-btn emoji-btn"
               title="Add emoji"
+              onClick={() => setShowEmojiPicker(prev => !prev)}
             >
               <i className="bi bi-emoji-smile"></i>
             </button>
+            {showEmojiPicker && (
+              <div className="emoji-picker-container" style={{ position: 'absolute', zIndex: 1000 }}>
+                <Picker onEmojiClick={onEmojiClick} />
+              </div>
+            )}
           </div>
 
           <div className="post-submit">
