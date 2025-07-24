@@ -136,16 +136,4 @@ Post ||--o{ Post : "original post"
 Profile ||--o{ Follow : "follows others"
 Profile ||--o{ Follow : "followed by"
 
-' Relationship labels with cardinalities
-Profile }o--|| ParseUser : authenticates
-Post }o--|| Profile : authored_by
-Comment }o--|| Profile : written_by
-Comment }o--|| Post : belongs_to
-Like }o--|| ParseUser : liked_by
-Like }o--|| Post : liked_post
-Retweet }o--|| ParseUser : retweeted_by
-Retweet }o--|| Post : retweeted_post
-Follow }o--|| Profile : follower
-Follow }o--|| Profile : following
-
 @enduml
