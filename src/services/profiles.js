@@ -235,3 +235,24 @@ export const removeProfileAvatar = async (profileId) => {
     throw error;
   }
 };
+
+/**
+ * Fetch top profiles (profiles with highest followersCount)
+ * @param {number} limit
+ */
+export const getTopPosters = async (limit = 3) => {
+  try {
+    const Profile = Parse.Object.extend("Profile");
+    const query = new Parse.Query(Profile);
+    // Ensure followersCount field exists and sort by most followers
+    query.exists("followersCount");
+    query.descending("followersCount");
+    query.limit(limit);
+
+    const results = await query.find();
+    return results.map(parseProfileToPlain);
+  } catch (error) {
+    console.error("Error fetching top posters:", error);
+    return [];
+  }
+};

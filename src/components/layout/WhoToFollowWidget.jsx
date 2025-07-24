@@ -1,63 +1,82 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import SubtleInfoText from "../shared/SubtleInfoText";
+import Spinner from "../shared/Spinner";
+import { getTopPosters } from "../../services/profiles.js";
 
-const suggestedUsers = [
-  {
-    id: 1,
-    name: "John Smith",
-    handle: "johnsmith",
-    avatar: "JS",
-  },
-  {
-    id: 2,
-    name: "Alice Johnson",
-    handle: "alicej",
-    avatar: "AJ",
-  },
-  {
-    id: 3,
-    name: "Mike Chen",
-    handle: "mikechen",
-    avatar: "MC",
-  },
-];
+export default function WhoToFollowWidget({ currentProfile }) {
+  const [suggestedUsers, setSuggestedUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-export default function WhoToFollowWidget() {
-  const handleFollow = (userId) => {
-    // Implement follow functionality
-  };
+  useEffect(() => {
+    const loadSuggestions = async () => {
+      setLoading(true);
+      try {
+        const profiles = await getTopPosters(3);
+        setSuggestedUsers(profiles);
+      } catch (err) {
+        console.error("Error loading top posters:", err);
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSuggestions();
+  }, []);
 
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="widget">
+        <div className="widget-header">
+          <h5 className="widget-title">Who to follow</h5>
+        </div>
+        <div className="widget-content" style={{ textAlign: 'center', padding: '1rem' }}>
+          <Spinner />
+        </div>
+      </div>
+    );
+  }
+  // Error state
+  if (error) {
+    return (
+      <div className="widget">
+        <div className="widget-header">
+          <h5 className="widget-title">Who to follow</h5>
+        </div>
+        <div className="widget-content">
+          <SubtleInfoText>(Unable to load suggestions)</SubtleInfoText>
+        </div>
+      </div>
+    );
+  }
+  // Data loaded
   return (
     <div className="widget">
       <div className="widget-header">
         <h5 className="widget-title">Who to follow</h5>
-        <SubtleInfoText>(Preview UI - no real data)</SubtleInfoText>
       </div>
       <div className="widget-content">
         {suggestedUsers.map((user) => (
-          <div key={user.id} className="widget-item">
+          <Link
+            key={user.id}
+            to={`/profile/${user.id}`}
+            className="widget-item suggestion-link"
+            style={{ textDecoration: 'none', color: 'inherit' }}
+          >
             <div className="suggestion-item">
               <div className="suggestion-info">
-                <div className="suggestion-avatar">{user.avatar}</div>
+                <div className="suggestion-avatar">{user.firstName?.[0] || user.username?.[0]}</div>
                 <div className="suggestion-details">
-                  <div className="suggestion-name">{user.name}</div>
-                  <div className="suggestion-handle">@{user.handle}</div>
+                  <div className="suggestion-name">{user.firstName} {user.lastName}</div>
+                  <div className="suggestion-handle">@{user.username}</div>
                 </div>
               </div>
-              <button
-                className="follow-btn"
-                onClick={() => handleFollow(user.id)}
-              >
-                Follow
-              </button>
             </div>
-          </div>
+          </Link>
         ))}
-        {/* <div className="widget-item">
-          <a href="#" style={{ color: "var(--primary)", textDecoration: "none", fontSize: "0.9rem" }}>
-            Show more
-          </a>
-        </div> */}
       </div>
     </div>
   );
