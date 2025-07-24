@@ -13,6 +13,7 @@ skinparam arrow {
     FontColor DarkBlue
 }
 
+' 2x2 Grid Layout
 class AppUser {
     +objectId : String
     +createdAt : Date
@@ -44,12 +45,25 @@ class Comment {
     +body : String
 }
 
+' Empty space for 2x2 grid balance
+class " " as Empty {
+}
+
+' Layout positioning for 2x2 grid
+AppUser -[hidden]right- Post
+Comment -[hidden]right- Empty
+AppUser -[hidden]down- Comment
+Post -[hidden]down- Empty
+
+' Hide the empty class
+hide Empty
+
 ' Relationships
 AppUser ||--o{ Post : "creates"
 AppUser ||--o{ Comment : "writes"
 Post ||--o{ Comment : "has"
 
-note right of AppUser : User profile information\nfor post authors
+note bottom of AppUser : User profile information\nfor post authors
 note left of Post : Post contents \nwith tags and optional images
 note bottom of Comment : User responses\nto posts
 
