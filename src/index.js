@@ -9,9 +9,12 @@ import App from "./App";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
+// Set basename for GitHub Pages deployment
+const basename = process.env.PUBLIC_URL || '';
+
 root.render(
   <React.StrictMode>
-    <Router>
+    <Router basename={basename}>
       <App />
     </Router>
   </React.StrictMode>

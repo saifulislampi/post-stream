@@ -2,7 +2,6 @@
   "name": "post-stream",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://saifulislampi.github.io/post-stream",
   "dependencies": {
     "@bytescale/upload-widget-react": "^4.19.0",
     "@testing-library/dom": "^10.4.0",
@@ -23,11 +22,13 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "build:github": "PUBLIC_URL=/post-stream npm run build",
+    "build:netlify": "npm run build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "seed": "node src/utils/seedData.js",
     "clean": "node src/utils/cleanDatabase.js",
-    "predeploy": "npm run build",
+    "predeploy": "npm run build:github",
     "deploy": "gh-pages -d build"
   },
   "eslintConfig": {

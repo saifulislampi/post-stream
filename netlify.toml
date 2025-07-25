@@ -6,7 +6,7 @@
   publish = "build"
   
   # Default build command
-  command = "npm run build"
+  command = "npm run build:netlify"
 
 [[redirects]]
   # Handle client-side routing
@@ -17,6 +17,8 @@
 [build.environment]
   # Set Node.js version
   NODE_VERSION = "20"
+  # Don't set PUBLIC_URL for Netlify (defaults to root)
+  # PUBLIC_URL = ""
   
 # Optional: Set up branch deploys
 [context.production]
