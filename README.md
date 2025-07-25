@@ -1,89 +1,129 @@
 
 # Post Stream
 
-Post Stream is a modern micro-blogging app inspired by Twitter, built with React and Back4App (Parse). Share short posts, follow users, and explore trending content in a clean, responsive interface.
+A modern micro-blogging application inspired by Twitter, built with React and Parse Server. Features real-time content discovery, social interactions, and dual-platform deployment.
 
-This project was developed as a class project for [CSE 40693 - Modern Web Development](https://www.coursicle.com/nd/courses/CSE/40693/) at Notre Dame.
-
----
-
-## Features
-
-### Core Features (with Backend)
-- Home page: view all posts from backend, create new post
-- Explore page: search posts and users
-- Profile page: follow/unfollow users, follower/following/post count
-- Post detail page: view post and replies
-- Authentication: register, login, logout, protected routes
-- User profiles: separate Profile class for public info and stats
-- Route protection: only authenticated users can access main app
-
-### UI Only (No Backend Yet)
-- Add image to post (UI only)
-- Right panel: trending topics and follow suggestions (UI only)
-- Post actions: react, reply, quote (UI only)
-- Profile page tabs: Replies, Media, Likes (UI only)
-- Reply to posts (UI only)
+Developed as a class project for CSE 40693 - Modern Web Development at Notre Dame.
 
 ---
 
-## Getting Started
+## Quick Start
 
-1. **Install dependencies:**
+1. **Install and run:**
    ```bash
    npm install
-   ```
-2. **Set up Back4App:**
-   - Create a free account at [Back4App](https://www.back4app.com/)
-   - Create a new app and get your Application ID, Client Key, and Server URL
-   - Update `src/environments.js` with your credentials
-3. **Seed the database with test data:**
-   *(Only needed if starting from a clean database or after changing your Back4App/Parse APPLICATION_ID)*
-   ```bash
-   npm run seed
-   ```
-4. **Start the development server:**
-   ```bash
    npm start
    ```
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-5. **Test with demo account:**
-   If you've set up correctly and seeded data (or started with the provided Parse config), you should be able to login with:
+2. **Demo account:**
    - **Username:** `janedoe` | **Password:** `password123`
 
----
-
-## Database Structure
-
-- **User (Parse.User):** Handles authentication (username, email, password, session)
-- **Profile:** Public user info, stats, referenced by posts/comments
-- **Post:** `authorId` (Profile), `body`, `tag`, `createdAt`, `commentsCount`, `likesCount`
-- **Comment:** `postId`, `authorId` (Profile), `body`, `createdAt`
-- **Follow:** `followerId` (Profile), `followingId` (Profile)
+*If you encounter Parse backend errors, see [Testing with Your Own Data](#testing-with-your-own-data) section.*
 
 ---
 
-## Scripts
-- `npm install` – Install dependencies
-- `npm run seed` – Seed Back4App with test data
-- `npm start` – Start the development server
-- `npm run build` – Build for production
+## Live Demo
+
+You can try the live deployed demo here:
+- **Primary**: [Netlify Deployment](https://spectacular-wisp-d472d3.netlify.app/)
+- **Alternative**: [GitHub Pages Deployment](https://saifulislampi.github.io/post-stream/)
+
+Use the demo account above to explore all features.
 
 ---
 
-## Authentication & Protected Routes
+## Feature 6 Implementation Overview
 
-- Full authentication system (register, login, logout) using Parse
-- ProtectedRoute and UnauthenticatedRoute components for route access control
-- Only authenticated users can access main app routes
-- Auth pages (login/register) are inaccessible when already logged in
-- See [AUTH_IMPLEMENTATION.md](./AUTH_IMPLEMENTATION.md) for details
+This project showcases advanced feature implementation by two students:
+
+### Student A: Core Social Features
+**Showkot Hossain** implemented fundamental social interaction features:
+- **Password Reset Flow** - Complete email-based password recovery
+- **Post Interactions** - Like, reply, and share functionality with real-time updates
+- **Image Upload** - Single image uploads to posts with file management
+- **Profile Avatars** - Upload and manage profile photos
+
+📄 **[Complete Student A Documentation →](Feature6-StudentA.md)**
+
+### Student B: Advanced Features & Architecture  
+**Md Saiful Islam** implemented advanced user experience and deployment features:
+- **Personalized Timeline** - Smart follow detection with intelligent empty state handling
+- **Multi-Modal Search System** - Hashtag, user, and text search with real-time autocomplete
+- **Follow/Unfollow System** - Instant UI updates with optimistic rendering and error rollback
+- **Bootstrap 5 Design System** - Professional responsive design with custom theme and components
+- **Dual Platform Deployment** - Automated deployment to both [Netlify](https://spectacular-wisp-d472d3.netlify.app/) and [GitHub Pages](https://saifulislampi.github.io/post-stream/) with CI/CD
+- **Hashtag System & Pages** - Dynamic routing and content aggregation for hashtag-based discovery
+- **Additional Features** - Trending analytics, emoji integration, enhanced profile pages, and maintainable routing architecture
+
+📄 **[Complete Student B Documentation →](Feature6-StudentB.md)**
 
 ---
 
+## Overall Implemented Features
 
-See [CHANGELOG.md](./CHANGELOG.md) for release notes and version history.
+### ✅ **Authentication & Security**
+- Complete user registration, login, logout system
+- Password reset via email
+- Protected routes and session management
+
+### ✅ **Social Interactions**
+- Create and view posts with image support
+- Like, reply, and retweet functionality
+- Follow/unfollow users with real-time updates
+- Profile avatar upload and management
+
+### ✅ **Content Discovery**  
+- Personalized timeline based on follows
+- Advanced search (hashtags, users, text)
+- Trending hashtag analytics
+- User recommendation system
+
+### ✅ **User Experience**
+- Professional Bootstrap 5 design system
+- Emoji picker integration
+- Responsive mobile-first layout
+- Real-time UI updates with optimistic rendering
+
+### ✅ **Advanced Features**
+- Hashtag pages with content aggregation  
+- Profile pages with content filtering
+- Dual-platform deployment (Netlify + GitHub Pages)
+- Configuration-based routing architecture
+
+---
+
+## Testing with Your Own Data
+
+To set up your own Parse backend:
+
+1. **Create a Back4App account:**
+   - Sign up at [Back4App](https://www.back4app.com/)
+   - Create a new app and get your credentials
+
+2. **Configure the application:**
+   - Update `src/environments.js` with your Application ID, Client Key, and Server URL
+
+3. **Seed test data:**
+   ```bash
+   npm run seed
+   ```
+
+4. **Database structure:** User authentication, Profile data, Posts, Comments, Follows, Likes, Retweets
+
+---
+
+## Authentication & Deployment
+
+- **Authentication**: Complete Parse-based auth system with protected routes
+- **Deployment**: Automated dual-platform deployment to Netlify and GitHub Pages
+- **Documentation**: See [AUTH_IMPLEMENTATION.md](AUTH_IMPLEMENTATION.md) and [DEPLOYMENT.md](DEPLOYMENT.md)
+
+---
+
+## Version History
+
+See [CHANGELOG.md](./CHANGELOG.md) for release notes and development timeline.
 
 ---
 
