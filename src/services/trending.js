@@ -42,10 +42,12 @@ export async function getTrendingHashtags(limit = 3) {
       { hashtag: 'react', title: '#react', count: '35 posts' },
       { hashtag: 'webdev', title: '#webdev', count: '28 posts' }
     ];
-    let i = 0;
-    while (items.length < limit && i < filler.length) {
-      if (!items.find(x => x.hashtag === filler[i].hashtag)) items.push(filler[i]);
-      i++;
+    
+    for (let idx = 0; items.length < limit && idx < filler.length; idx++) {
+      const fillerItem = filler[idx];
+      if (!items.find(x => x.hashtag === fillerItem.hashtag)) {
+        items.push(fillerItem);
+      }
     }
 
     return items.slice(0, limit);
