@@ -68,6 +68,7 @@ export default function App() {
   const handleLogin = async (username, password) => {
     try {
       const { user, profile } = await login(username, password);
+      console.log('App: User logged in:', user, 'Profile:', profile);
       setCurrentUser(user);
       setCurrentProfile(profile);
       navigate("/");

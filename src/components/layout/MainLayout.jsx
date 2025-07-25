@@ -16,7 +16,7 @@ const MainLayout = ({ currentUser, currentProfile, onLogout }) => {
           <main className="col-12 col-lg-6 col-xl-5 main-content">
             <Outlet />
           </main>
-          <RightSidebar />
+          <RightSidebar currentProfile={currentProfile} />
         </div>
       </div>
     </>

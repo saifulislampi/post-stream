@@ -2,7 +2,6 @@
   "name": "post-stream",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://saifulislampi.github.io/post-stream",
   "dependencies": {
     "@bytescale/upload-widget-react": "^4.19.0",
     "@testing-library/dom": "^10.4.0",

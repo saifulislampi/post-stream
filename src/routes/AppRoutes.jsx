@@ -8,8 +8,8 @@ import { publicRoutes, protectedRoutes, specialRoutes } from "./routeConfig";
 
 const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUpdate, feedRefreshCount }) => {
   // Props mapping function to dynamically assign props to components
-  const getPropsForComponent = (component) => {
-    const componentName = component.name;
+  const getPropsForComponent = (route) => {
+    const routeName = route.name;
 
     // Common props by component type
     const propsByComponent = {
@@ -21,7 +21,7 @@ const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUp
       AuthLogin: { onLogin },
     };
 
-    return propsByComponent[componentName] || {};
+    return propsByComponent[routeName] || {};
   };
 
   return (
@@ -36,7 +36,7 @@ const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUp
       >
         {publicRoutes.map((route) => {
           const Component = route.component;
-          const componentProps = getPropsForComponent(Component);
+          const componentProps = getPropsForComponent(route);
 
           return (
             <Route
@@ -62,14 +62,14 @@ const AppRoutes = ({ currentUser, currentProfile, onLogout, onLogin, onProfileUp
       >
         {protectedRoutes.map((route) => {
           const Component = route.component;
-          const componentProps = getPropsForComponent(Component);
+          const componentProps = getPropsForComponent(route);
 
           return (
             <Route
               key={route.path}
               path={route.path}
               element={
-                route.component.name === 'Timeline' ?
+                route.name === 'Timeline' ?
                   <Component key={componentProps.feedRefreshCount} {...componentProps} /> :
                   <Component {...componentProps} />
               }

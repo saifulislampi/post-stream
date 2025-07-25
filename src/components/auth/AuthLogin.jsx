@@ -19,8 +19,11 @@ const AuthLogin = ({ onLogin }) => {
 
     try {
       if (onLogin) {
+        console.log('AuthLogin: onLogin prop provided, calling it');
+        // If onLogin prop is provided, use it to handle login
         await onLogin(form.username, form.password);
       } else {
+        console.log('AuthLogin: No onLogin prop, calling login service');
         await login(form.username, form.password);
         navigate("/");
       }
