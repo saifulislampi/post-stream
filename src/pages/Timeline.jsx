@@ -95,13 +95,19 @@ export default function Timeline({ currentUser, currentProfile, feedRefreshCount
       {/* Feed Section */}
       {loadingFeed ? (
         <Spinner />
-      ) : currentProfile && currentProfile.followingCount === 0 ? (
+      ) : feedPosts.length === 0 ? (
         <div className="text-center mt-5">
-          <p>You are not currently following anyone.</p>
-          <p>
-            Follow some users or <Link to="/explore">explore</Link> trending
-            posts.
-          </p>
+          {currentProfile && currentProfile.followingCount === 0 ? (
+            <>
+              <p>You are not currently following anyone.</p>
+              <p>
+                Follow some users or <Link to="/explore">explore</Link> trending
+                posts to see more content in your feed.
+              </p>
+            </>
+          ) : (
+            <p>No posts found in your feed.</p>
+          )}
         </div>
       ) : (
         <>
